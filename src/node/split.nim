@@ -33,10 +33,13 @@ proc percentiles(data: seq[float]): seq[float] =
                 result.add v
                 result.add (v + sorted_data[i+1]) / 2
         return result 
-    result = new_seq[float](10)
+    result = new_seq[float]()
     for perc in 1..9:
         let i = (perc / 10 * sorted_data.len().float).round.int
-        result[perc-1] = sorted_data[i]
+        let with_prev = (sorted_data[i] + sorted_data[i-1]) / 2
+        let with_next = (sorted_data[i] + sorted_data[i+1]) / 2
+        result.add with_prev
+        result.add with_next
 
 proc best_split_col[with_index: static[bool]](n: Node, x_col: seq[float], y: seq[float]): SplitResult =
     let splits = percentiles(x_col)
