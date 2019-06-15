@@ -4,12 +4,9 @@ import system
 import math
 import ../utils
 
-type 
-    SplitResult* = ref object
-        split_value*: float
-        impurity*: float
-        col*: int
-        index*: array[2, seq[int]]
+import splitresult
+
+type ImpurityF = proc(y: seq[float]): float
 
 proc new_split_result(split_value, impurity: float): SplitResult =
     result = new(SplitResult)
@@ -41,7 +38,8 @@ proc percentiles(data: seq[float]): seq[float] =
         result.add with_prev
         result.add with_next
 
-proc best_split_col[with_index: static[bool]](n: Node, x_col: seq[float], y: seq[float]): SplitResult =
+proc best_split_col[with_index: static[bool]](impurity_f: ImpurityF, x_col: seq[float], y: seq[float]): SplitResult =
+    assert x_col.len == y.len
     let splits = percentiles(x_col)
     echo "splits: ", splits
     var min_impurity = Inf
@@ -64,8 +62,8 @@ proc best_split_col[with_index: static[bool]](n: Node, x_col: seq[float], y: seq
                 y2.add y[i]
                 when with_index:
                     i2.add i
-        let impurity_y1 = n.impurity(y1)
-        let impurity_y2 = n.impurity(y2)
+        let impurity_y1 = impurity_f(y1)
+        let impurity_y2 = impurity_f(y2)
         let tot_impurity: float = impurity_y1 + impurity_y2
         if min_impurity > tot_impurity:
             min_impurity = tot_impurity
@@ -78,13 +76,13 @@ proc best_split_col[with_index: static[bool]](n: Node, x_col: seq[float], y: seq
         return new_split_result(best_split, min_impurity)
 
 
-proc best_split*[with_index: static[bool]](n: Node, X: seq[seq[float]], y: seq[float]): SplitResult =
+proc best_split*[with_index: static[bool]](impurity_f: ImpurityF, X: seq[seq[float]], y: seq[float]): SplitResult =
     var 
         best_split: SplitResult = new_split_result(-1, Inf)
         best_col = -1
     for j in 0..<X[0].len:
         echo "column ", j
-        let j_split = best_split_col[with_index](n, X.column(j), y)
+        let j_split = best_split_col[with_index](impurity_f, X.column(j), y)
         if best_split.impurity > j_split.impurity:
             echo "new best_split.impurity ",  j_split.impurity
             echo "new best_split.split_value ",  j_split.split_value

@@ -9,7 +9,8 @@ proc unique_class(y: seq[float]): bool =
     return true
 
 proc on_creating_new_node*(n: Node, X: seq[seq[float]], y: seq[float]): bool =
-    if n.task == Classification:
+    if n.tree_task == Classification:
         if unique_class(y):
             return true
     return n.level >= 3 or y.len <= 1
+

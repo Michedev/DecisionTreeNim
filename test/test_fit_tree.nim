@@ -14,7 +14,7 @@ proc read_X_data() : seq[seq[float]] =
         result[i] = row
         inc i
     f.close()
-
+ 
 proc read_y_data(): seq[float] =
     let f: File = open "test/y_data"
     result = new_seq[float](200)
