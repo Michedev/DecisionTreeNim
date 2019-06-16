@@ -20,6 +20,15 @@ proc new_split_result(split_value, impurity: float, col: int, index: array[2, se
     result.col = col
     result.index = index
 
+proc next_different(data: seq[float], i: int): float {.inline.} =
+    if data.len == i + 1:
+        return data[i] * 0.9
+    for j in (i+1)..<data.len:
+        if data[j] != data[i]:
+            return data[j]
+    return data[i] * 0.9
+
+
 # try to submit into stats package
 proc percentiles(data: seq[float]): seq[float] =
     let sorted_data = data.sorted(cmp)
@@ -33,10 +42,11 @@ proc percentiles(data: seq[float]): seq[float] =
     result = new_seq[float]()
     for perc in 1..9:
         let i = (perc / 10 * sorted_data.len().float).round.int
-        let with_prev = (sorted_data[i] + sorted_data[i-1]) / 2
-        let with_next = (sorted_data[i] + sorted_data[i+1]) / 2
-        result.add with_prev
+        # let with_prev = (sorted_data[i] + sorted_data[i-1]) / 2
+        let with_next = (sorted_data[i] + sorted_data.next_different(i)) / 2
+        # result.add with_prev
         result.add with_next
+    result = result[1..(result.len-2)]
 
 proc best_split_col[with_index: static[bool]](impurity_f: ImpurityF, x_col: seq[float], y: seq[float]): SplitResult =
     assert x_col.len == y.len

@@ -6,7 +6,7 @@ import tables
 
 proc get_leaf_func*(n: Node, X: seq[seq[float]], y: seq[float]) : proc(x: seq[float]): float =
     if n.tree_task == Classification:
-        var ctable = toCountTable(y)
+        var ctable = toCountTable y
         let mode: float = ctable.largest.key
         return proc(x: seq[float]): float = mode
     else:

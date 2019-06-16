@@ -2,30 +2,37 @@ import node/[node, constructors, split, sons_gen, traverse]
 import task
 import typetraits
 import core.typeinfo
+import math
 import sequtils
 import rule/[tree_rules, stop_rules]
 
 type 
-    DecisionTree* = ref object
+    DecisionTree*  = ref object
         root: Node
-        stop_rules: TreeStopRules
+        grow_rules: TreeGrowRules
+        max_features: float
+        max_depth: int
+        min_samples_split: int
     NodeWithData = tuple[n: Node, X: seq[seq[float]], y: seq[float]]
 
-proc new_tree(task: Task, max_depth, min_samples_split: int): DecisionTree =
+proc new_tree (task: Task, max_depth, min_samples_split: int, max_features: float): DecisionTree =
     result = new(DecisionTree)
-    result.stop_rules = new_tree_stop_rules()
-    result.root = new_root(task)
+    result.grow_rules = new_tree_grow_rules()
+    result.root = new_root(task, tree_rules=result.grow_rules)
     if max_depth != -1:
-        result.stop_rules.add_creation_rule max_depth_rule(max_depth)
+        result.grow_rules.stop_rules.add_creation_rule max_depth_rule(max_depth)
     if min_samples_split != -1:
-        result.stop_rules.add_pre_split_rule min_samples_split_rule(min_samples_split)
+        result.grow_rules.stop_rules.add_pre_split_rule min_samples_split_rule(min_samples_split)
+    result.grow_rules.stop_rules.add_creation_rule unique_class_rule()
+    result.grow_rules.stop_rules.add_creation_rule impurity_rule(0.01)
+    result.max_features = max_features
 
 
-proc new_classification_tree*(max_depth: int = -1, min_samples_split: int = -1): DecisionTree = 
-    new_tree(task=Classification, max_depth, min_samples_split) 
+proc new_classification_tree* (max_depth: int = -1, min_samples_split: int = 1, max_features: float = 1.0): DecisionTree = 
+    new_tree(task=Classification, max_depth, min_samples_split, max_features) 
 
-proc new_regression_tree*(max_depth: int = -1, min_samples_split: int = -1): DecisionTree = 
-    new_tree(task=Regression, max_depth, min_samples_split)
+proc new_regression_tree* (max_depth: int = -1, min_samples_split: int = 1, max_features: float = 1.0): DecisionTree = 
+    new_tree(task=Regression, max_depth, min_samples_split, max_features)
 
 proc fit* (t: DecisionTree, X: seq[seq[float]], y: seq[float]) =
     assert X.len == y.len

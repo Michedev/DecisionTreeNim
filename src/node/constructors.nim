@@ -20,7 +20,7 @@ proc new_son*(father: Node): Node =
     result.tree_task = father.tree_task
     result.tree_rules = father.tree_rules
 
-proc new_root*(task: Task, impurity: proc(y: seq[float]): float = nil, tree_rules: TreeStopRules = nil): Node =
+proc new_root*(task: Task, impurity: proc(y: seq[float]): float = nil, tree_rules: TreeGrowRules = nil): Node =
     result = new(Node)
     result.level = 0
     result.tree_task = task
@@ -34,5 +34,5 @@ proc new_root*(task: Task, impurity: proc(y: seq[float]): float = nil, tree_rule
     if not tree_rules.is_nil():
         result.tree_rules = tree_rules
     else:
-        result.tree_rules = new_tree_stop_rules()
+        result.tree_rules = new_tree_grow_rules(1.0)
 

@@ -9,7 +9,7 @@ type
                 level*: Natural
                 tree_task*: Task
                 impurity*: proc(y: seq[float]): float
-                tree_rules*: TreeStopRules
+                tree_rules*: TreeGrowRules
         Leaf* = ref object of Node
                 leaf_f*: proc(x: seq[float]): float
                 leaf_proba: proc(x: seq[float]): seq[float]

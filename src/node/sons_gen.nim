@@ -15,7 +15,7 @@ proc generate_sons*(n: Node, X: seq[seq[float]], y: seq[float]): Sons =
         X1 = new_seq[seq[float]](x1_len)
         y1 = new_seq[float](x1_len)
         X2: seq[seq[float]] = new_seq[seq[float]](x2_len)
-        y2 = new_seq[float](x2_len  )
+        y2 = new_seq[float](x2_len)
         X_splitted = [X1, X2]
         y_splitted = [y1, y2]
     for i in [0,1]:
@@ -23,9 +23,10 @@ proc generate_sons*(n: Node, X: seq[seq[float]], y: seq[float]): Sons =
             X_splitted[i][i_indx] = X[indx]
             y_splitted[i][i_indx] = y[indx]
     for i in [0, 1]:
-        if stop.on_creating_new_node(n, X_splitted[i], y_splitted[i]):
+        if n.tree_rules.stop_rules.validate_creation(n, X_splitted[i], y_splitted[i]):
             echo "create new leaf for son number ", i+1
             n.sons[i] = new_leaf(n, X_splitted[i], y_splitted[i])
+            echo "y leaf: ", y_splitted[i]
         else:
             echo "create new node for son number ", i+1
             n.sons[i] = new_son(n)
