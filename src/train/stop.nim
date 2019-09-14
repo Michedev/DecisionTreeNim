@@ -1,4 +1,4 @@
-import node
+import ../node/node
 import ../task
 
 proc unique_class(y: seq[float]): bool =

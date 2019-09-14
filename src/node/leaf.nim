@@ -14,7 +14,7 @@ proc get_leaf_func*(n: Node, X: seq[seq[float]], y: seq[float]) : proc(x: seq[fl
         return proc(x: seq[float]): float = m
 
 #TODO export and add field on leaf type
-proc get_leaf_proba_func(n: Node, X: seq[seq[float]], y: seq[float]) : proc(x: seq[float]): seq[float] =
+proc get_leaf_proba_func*(n: Node, X: seq[seq[float]], y: seq[float]) : proc(x: seq[float]): seq[float] =
     if n.tree_task == Classification:
         var count_table = toCountTable y
         var probs = new_seq[float](count_table.len)
@@ -23,3 +23,5 @@ proc get_leaf_proba_func(n: Node, X: seq[seq[float]], y: seq[float]) : proc(x: s
             probs[i] = freq / y.len
             inc i
         return proc(x: seq[float]): seq[float] = probs
+    elif n.tree_task == Regression:
+        raise newException(Exception, "Cannot estimate probability in a regression tree")

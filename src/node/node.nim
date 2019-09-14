@@ -4,6 +4,8 @@ import ../rule/tree_rules
 type 
         Node* = ref object of RootObj
                 sons*: array[2, Node]
+                num_sons* : int
+                father*: Node
                 split_value*: float
                 split_column*: int
                 level*: Natural
@@ -12,7 +14,8 @@ type
                 tree_rules*: TreeGrowRules
         Leaf* = ref object of Node
                 leaf_f*: proc(x: seq[float]): float
-                leaf_proba: proc(x: seq[float]): seq[float]
+                leaf_proba*: proc(x: seq[float]): seq[float]
+        RootIsLeaf* = object of Exception
 
 proc is_leaf*(n: Node): bool = n is Leaf
 
