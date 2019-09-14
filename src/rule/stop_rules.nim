@@ -1,4 +1,5 @@
 import tree_rules
+import ../train/splitresult
 import ../node/inode
 
 proc min_samples_split_rule*(min_samples_split: int): Rule =
@@ -15,8 +16,11 @@ proc unique_class_rule*(): Rule =
                 return false
         return true)
 
-proc impurity_rule*(threshold: float): Rule =
-    (proc(n: INode, X: seq[seq[float]], y: seq[float]): bool =
-        let imp = n.impurity_f(y)
-        echo "Impurity: ", imp
-        return imp < threshold)
+proc min_impurity_decrease*(threshold: float): PostSplitRule =
+    (
+        proc(n: INode, X: seq[seq[float]], y: seq[float], X1: seq[seq[float]], y1: seq[float], X2: seq[seq[float]], y2: seq[float]): bool =
+            let decrease = n.impurity_f(y) - (n.impurity_f(y1) + n.impurity_f(y2)) 
+            echo "decrease is ", decrease 
+            return decrease < threshold
+        
+    )
