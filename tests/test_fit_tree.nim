@@ -19,15 +19,15 @@ suite "Test fit classification tree":
         t.print_root_split()
         require(y_pred == y1)
     test "Perfect single split with a lot of data":
-        let X_long = read_X_data("test/data/X_data")
-        let y_long = read_y_data("test/data/y_data")
+        let X_long = read_X_data("tests/data/X_data")
+        let y_long = read_y_data("tests/data/y_data")
         t.fit(X_long, y_long)
         var y_pred = t.predict(X_long)
         require(y_pred.len == y_long.len)
         require(y_pred == y_long)
     test "Test fit tree on iris dataset":
-        let X_iris = read_X_data("test/data/X_iris.csv")
-        let y_iris = read_y_data("test/data/y_iris.csv")
+        let X_iris = read_X_data("tests/data/X_iris.csv")
+        let y_iris = read_y_data("tests/data/y_iris.csv")
         t.fit(X_iris, y_iris)
         let yhat = t.predict(X_iris)
         require(yhat.len == y_iris.len)
@@ -35,29 +35,29 @@ suite "Test fit classification tree":
         require(1.0 in yhat)
         require(2.0 in yhat)
     test "Decision tree should overfit when predict on Iris train set":
-        let X_iris = read_X_data("test/data/X_iris.csv")
-        let y_iris = read_y_data("test/data/y_iris.csv")
+        let X_iris = read_X_data("tests/data/X_iris.csv")
+        let y_iris = read_y_data("tests/data/y_iris.csv")
         t.fit(X_iris, y_iris)
         let yhat = t.predict(X_iris)
         let accuracy_iris = accuracy(y_iris, yhat)
         require(accuracy_iris > 0.95)
         echo "accuracy on iris train set is ", accuracy_iris
     test "Random forest should overfit when predict on Iris train set":
-        let X_iris = read_X_data("test/data/X_iris.csv")
-        let y_iris = read_y_data("test/data/y_iris.csv")
+        let X_iris = read_X_data("tests/data/X_iris.csv")
+        let y_iris = read_y_data("tests/data/y_iris.csv")
         let rf = new_random_forest_classifier(100, 1)
         rf.fit(X_iris, y_iris)
         let yhat = rf.predict(X_iris)
         let accuracy_iris = accuracy(y_iris, yhat)
         require(accuracy_iris > 0.95)
         echo "accuracy on iris train set is ", accuracy_iris
-    # test "Random forest with parallel training should overfit when predict on Iris train set":
-    #     let X_iris = read_X_data("test/data/X_iris.csv")
-    #     let y_iris = read_y_data("test/data/y_iris.csv")
-    #     let rf = new_random_forest_classifier(100, 1)
-    #     rf.fit(X_iris, y_iris)
-    #     let yhat = rf.predict(X_iris)
-    #     let accuracy_iris = accuracy(y_iris, yhat)
-    #     require(accuracy_iris > 0.95)
-    #     echo "accuracy on iris train set is ", accuracy_iris
+    test "Random forest with parallel training should overfit when predict on Iris train set":
+        let X_iris = read_X_data("tests/data/X_iris.csv")
+        let y_iris = read_y_data("tests/data/y_iris.csv")
+        let rf = new_random_forest_classifier(100, 4)
+        rf.fit(X_iris, y_iris)
+        let yhat = rf.predict(X_iris)
+        let accuracy_iris = accuracy(y_iris, yhat)
+        require(accuracy_iris > 0.95)
+        echo "accuracy on iris train set is ", accuracy_iris
     
