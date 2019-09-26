@@ -6,41 +6,69 @@ import core.typeinfo
 import math
 import sequtils
 import options
-import rule/[tree_rules, stop_rules]
+import rule/[tree_rules, stop_rules, bagging]
 
 type 
     DecisionTree*  = ref object
         root: Node
-        grow_rules: TreeGrowRules
+        stop_rules: TreeStopRules
         max_features: float
         max_depth: int
+        bagging: float
         min_samples_split: int
 
-proc new_tree (task: Task, max_depth, min_samples_split: int, max_features: float): DecisionTree =
-    result = new(DecisionTree)
-    result.grow_rules = new_tree_grow_rules()
-    result.root = new_root(task, tree_rules=result.grow_rules)
+proc assert_int_hp(value: int, msg: string = "") =
+    assert value == -1 or value > 0, msg
+
+proc assert_0_1_float_hp(value: float, msg: string = "") = 
+    assert value <= 1.0 or value >= 0.0 or value == -1.0, msg
+
+proc assert_positive_float_hp(value: float, msg: string = "") =
+    assert value == -1.0 or value > 0.0, msg
+
+proc add_rules(tree: DecisionTree, max_depth: int, min_samples_split: int, max_features: float, min_impurity_decrease: float) =
     if max_depth != -1:
-        result.grow_rules.stop_rules.add_creation_rule max_depth_rule(max_depth)
+        tree.stop_rules.add_creation_rule max_depth_rule(max_depth)
     if min_samples_split != -1:
-        result.grow_rules.stop_rules.add_pre_split_rule min_samples_split_rule(min_samples_split)
-    result.grow_rules.stop_rules.add_creation_rule unique_class_rule()
-    result.grow_rules.stop_rules.add_post_split_rule min_impurity_decrease(0.0001)
+        tree.stop_rules.add_pre_split_rule min_samples_split_rule(min_samples_split)
+    if min_impurity_decrease != -1.0:
+        tree.stop_rules.add_post_split_rule min_impurity_decrease_rule(min_impurity_decrease)
+    
+    tree.stop_rules.add_creation_rule unique_class_rule()
+
+
+proc new_tree (task: Task, max_depth: int, min_samples_split: int, max_features: float, min_impurity_decrease: float, bagging: float): DecisionTree =
+    result = new(DecisionTree)
+    assert_int_hp(max_depth)
+    assert_int_hp(min_samples_split)
+    assert_0_1_float_hp(max_features)
+    assert_positive_float_hp(min_impurity_decrease)
+    assert_0_1_float_hp(bagging)
+    result.stop_rules = new_tree_stop_rules()
+    result.add_rules(max_depth, min_samples_split, max_features, min_impurity_decrease)
+    result.root = new_root(task, stop_rules=result.stop_rules)
     result.max_features = max_features
+    result.bagging = bagging
 
 
-proc new_classification_tree* (max_depth: int = -1, min_samples_split: int = -1, max_features: float = 1.0): DecisionTree = 
-    new_tree(task=Classification, max_depth, min_samples_split, max_features) 
+proc new_classification_tree* (max_depth: int = -1, min_samples_split: int = -1, max_features: float = 1.0, min_impurity_decrease: float = 1e-6,
+                               bagging: float = 1.0): DecisionTree = 
+    new_tree(task=Classification, max_depth, min_samples_split, max_features, min_impurity_decrease, bagging) 
 
-proc new_regression_tree* (max_depth: int = -1, min_samples_split: int = 1, max_features: float = 1.0): DecisionTree = 
-    new_tree(task=Regression, max_depth, min_samples_split, max_features)
+proc new_regression_tree* (max_depth: int = -1, min_samples_split: int = -1, max_features: float = 1.0, min_impurity_decrease: float = 1e-6,
+                           bagging: float = 1.0): DecisionTree = 
+    new_tree(task=Regression, max_depth, min_samples_split, max_features, min_impurity_decrease, bagging) 
 
 ## Train function of decision tree
 proc fit* (t: DecisionTree, X: seq[seq[float]], y: seq[float]) {.gcsafe.} =
+    var X_train = X
+    var y_train = y
+    if t.bagging < 1.0:
+        (X_train, y_train) = bagging(X_train, y_train, t.bagging)
     try:
-        fit(t.root, X, y)
+        fit(t.root, X_train, y_train)
     except RootIsLeaf:
-        t.root = new_root_leaf(X,y)
+        t.root = new_root_leaf(X_train,y_train)
 
 proc print_root_split*(t: DecisionTree) =
     if t.root of Leaf:

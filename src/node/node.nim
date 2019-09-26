@@ -9,9 +9,10 @@ type
                 split_value*: float
                 split_column*: int
                 level*: Natural
+                max_features*: float
                 tree_task*: Task
                 impurity*: proc(y: seq[float]): float {.gcsafe.}
-                tree_rules*: TreeGrowRules
+                stop_rules*: TreeStopRules
         Leaf* = ref object of Node
                 leaf_f*: proc(x: seq[float]): float {.gcsafe.}
                 leaf_proba*: proc(x: seq[float]): seq[float] {.gcsafe.}
