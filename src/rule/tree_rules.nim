@@ -1,6 +1,4 @@
 import ../node/inode
-import sequtils
-import ../train/splitresult
 
 type 
     Rule* = proc(n: INode, X: seq[seq[float]], y: seq[float]): bool {.gcsafe.}
@@ -13,9 +11,7 @@ type
         ## Rules checked after found the best split for a internal node. 
         ## The type is different from the other two because receive in input also the split informations
         post_split_rules: seq[PostSplitRule]
-    TreeGrowRules* = ref object
-        stop_rules*: TreeStopRules
-        max_features: float
+
 
 proc new_tree_stop_rules*(): TreeStopRules =
     result = new(TreeStopRules)
@@ -23,12 +19,6 @@ proc new_tree_stop_rules*(): TreeStopRules =
     result.pre_split_rules = @[]
     result.post_split_rules = @[]
 
-proc new_tree_grow_rules*(max_features: float = 1.0): TreeGrowRules =
-    result = new(TreeGrowRules)
-    result.max_features = max_features
-    result.stop_rules = new_tree_stop_rules()
-
-proc max_features*(t: TreeGrowRules): float = t.max_features
 
 proc add_creation_rule* (tr: TreeStopRules, rule: Rule) =
     tr.creation_rules.add rule
