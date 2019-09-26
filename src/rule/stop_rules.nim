@@ -16,11 +16,11 @@ proc unique_class_rule*(): Rule =
                 return false
         return true)
 
-proc min_impurity_decrease*(threshold: float): PostSplitRule =
+proc min_impurity_decrease_rule*(threshold: float): PostSplitRule =
     (
         proc(n: INode, X: seq[seq[float]], y: seq[float], X1: seq[seq[float]], y1: seq[float], X2: seq[seq[float]], y2: seq[float]): bool {.gcsafe.} =
             let decrease = n.impurity_f(y) - (n.impurity_f(y1) + n.impurity_f(y2)) 
-            echo "decrease is ", decrease 
+            # echo"decrease is ", decrease 
             return decrease < threshold
         
     )
