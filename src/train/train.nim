@@ -5,7 +5,7 @@ import options
 type NodeWithData = tuple[n: Node, X: seq[seq[float]], y: seq[float]]
 
 ## Train function of decision tree
-proc fit* (root: Node, X: seq[seq[float]], y: seq[float]) =
+proc fit* (root: Node, X: seq[seq[float]], y: seq[float]) {.gcsafe.} =
     assert X.len == y.len
     var border = new_seq[NodeWithData](1)
     border[0] = (root, X, y)

@@ -1,6 +1,7 @@
 import ../src/tree
 import unittest
 import strutils
+import ../src/random_forest/random_forest
 import test_utils
 
 suite "Test fit classification tree":
@@ -41,3 +42,22 @@ suite "Test fit classification tree":
         let accuracy_iris = accuracy(y_iris, yhat)
         require(accuracy_iris > 0.95)
         echo "accuracy on iris train set is ", accuracy_iris
+    test "Random forest should overfit when predict on Iris train set":
+        let X_iris = read_X_data("test/data/X_iris.csv")
+        let y_iris = read_y_data("test/data/y_iris.csv")
+        let rf = new_random_forest_classifier(100, 1)
+        rf.fit(X_iris, y_iris)
+        let yhat = rf.predict(X_iris)
+        let accuracy_iris = accuracy(y_iris, yhat)
+        require(accuracy_iris > 0.95)
+        echo "accuracy on iris train set is ", accuracy_iris
+    # test "Random forest with parallel training should overfit when predict on Iris train set":
+    #     let X_iris = read_X_data("test/data/X_iris.csv")
+    #     let y_iris = read_y_data("test/data/y_iris.csv")
+    #     let rf = new_random_forest_classifier(100, 1)
+    #     rf.fit(X_iris, y_iris)
+    #     let yhat = rf.predict(X_iris)
+    #     let accuracy_iris = accuracy(y_iris, yhat)
+    #     require(accuracy_iris > 0.95)
+    #     echo "accuracy on iris train set is ", accuracy_iris
+    

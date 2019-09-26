@@ -10,11 +10,11 @@ type
                 split_column*: int
                 level*: Natural
                 tree_task*: Task
-                impurity*: proc(y: seq[float]): float
+                impurity*: proc(y: seq[float]): float {.gcsafe.}
                 tree_rules*: TreeGrowRules
         Leaf* = ref object of Node
-                leaf_f*: proc(x: seq[float]): float
-                leaf_proba*: proc(x: seq[float]): seq[float]
+                leaf_f*: proc(x: seq[float]): float {.gcsafe.}
+                leaf_proba*: proc(x: seq[float]): seq[float] {.gcsafe.}
         RootIsLeaf* = object of Exception
 
 proc is_leaf*(n: Node): bool = n is Leaf

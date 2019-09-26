@@ -27,7 +27,7 @@ proc new_son*(father: Node): Node =
     father.num_sons += 1
 
 
-proc new_root*(task: Task, impurity: proc(y: seq[float]): float = nil, tree_rules: TreeGrowRules = nil): Node =
+proc new_root*(task: Task, impurity: proc(y: seq[float]): float {.gcsafe.} = nil, tree_rules: TreeGrowRules = nil): Node =
     result = new(Node)
     result.level = 0
     result.num_sons = 0

@@ -36,7 +36,7 @@ proc new_regression_tree* (max_depth: int = -1, min_samples_split: int = 1, max_
     new_tree(task=Regression, max_depth, min_samples_split, max_features)
 
 ## Train function of decision tree
-proc fit* (t: DecisionTree, X: seq[seq[float]], y: seq[float]) =
+proc fit* (t: DecisionTree, X: seq[seq[float]], y: seq[float]) {.gcsafe.} =
     try:
         fit(t.root, X, y)
     except RootIsLeaf:
@@ -48,14 +48,14 @@ proc print_root_split*(t: DecisionTree) =
     else:
         echo "Root node, split in column ", t.root.split_column, " with value ", t.root.split_value
             
-proc predict*(tree: DecisionTree, x: seq[float]): float =
+proc predict*(tree: DecisionTree, x: seq[float]): float {.gcsafe.} =
     tree.root.get_value(x)
 
-proc predict*(tree: DecisionTree, X: seq[seq[float]]): seq[float] =
+proc predict*(tree: DecisionTree, X: seq[seq[float]]): seq[float] {.gcsafe.} =
     X.map_it(tree.predict(it))
 
-proc predict_proba*(tree: DecisionTree, x: seq[float]): seq[float] =
+proc predict_proba*(tree: DecisionTree, x: seq[float]): seq[float] {.gcsafe.} =
     tree.root.get_proba(x)
 
-proc predict_proba*(tree: DecisionTree, X: seq[seq[float]]): seq[seq[float]] =
+proc predict_proba*(tree: DecisionTree, X: seq[seq[float]]): seq[seq[float]] {.gcsafe.} =
     X.map_it(tree.predict_proba(it))

@@ -68,7 +68,7 @@ proc split_y_by_value[with_index: static[bool]](x_col, y: seq[float], split_valu
         return (y1, y2, @[], @[])
 
 
-proc best_split_col[with_index: static[bool]](impurity_f: ImpurityF, x_col: seq[float], y: seq[float]): SplitResult =
+proc best_split_col[with_index: static[bool]](impurity_f: ImpurityF, x_col: seq[float], y: seq[float]): SplitResult {.gcsafe.} =
     assert x_col.len == y.len
     let splits = percentiles(x_col)
     echo "splits: ", splits
@@ -94,7 +94,7 @@ proc best_split_col[with_index: static[bool]](impurity_f: ImpurityF, x_col: seq[
         return new_split_result(best_split, min_impurity)
 
 
-proc best_split*[with_index: static[bool]](impurity_f: ImpurityF, X: seq[seq[float]], y: seq[float]): SplitResult =
+proc best_split*[with_index: static[bool]](impurity_f: ImpurityF, X: seq[seq[float]], y: seq[float]): SplitResult {.gcsafe.} =
     var 
         best_split: SplitResult = new_split_result(-1, Inf)
     for j in 0..<X[0].len:

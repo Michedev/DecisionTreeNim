@@ -6,7 +6,7 @@ import options
 
 type Sons = tuple[first, second: Node, X1, X2: seq[seq[float]], y1, y2: seq[float]]
 
-proc generate_sons*(n: Node, X: seq[seq[float]], y: seq[float]): Option[Sons] =
+proc generate_sons*(n: Node, X: seq[seq[float]], y: seq[float]): Option[Sons] {.gcsafe.} =
     let split: SplitResult = best_split[true](n.impurity, X, y)
     echo "Split on ", split.col, " with value ",  split.split_value
     n.split_column = split.col
