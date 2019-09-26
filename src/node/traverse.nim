@@ -1,5 +1,4 @@
 import node
-import typetraits
 
 
 method get_value*(n: Node, x: seq[float]): float {.gcsafe.} =

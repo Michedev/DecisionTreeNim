@@ -3,6 +3,7 @@ import algorithm
 import system
 import math
 import ../utils
+import random
 
 import splitresult
 
@@ -71,7 +72,7 @@ proc split_y_by_value[with_index: static[bool]](x_col, y: seq[float], split_valu
 proc best_split_col[with_index: static[bool]](impurity_f: ImpurityF, x_col: seq[float], y: seq[float]): SplitResult {.gcsafe.} =
     assert x_col.len == y.len
     let splits = percentiles(x_col)
-    echo "splits: ", splits
+    # echo"splits: ", splits
     var min_impurity = Inf
     var best_split = 0.0
     when with_index:
@@ -93,16 +94,21 @@ proc best_split_col[with_index: static[bool]](impurity_f: ImpurityF, x_col: seq[
     else:
         return new_split_result(best_split, min_impurity)
 
+proc random_features(num_features: int, max_features: float): seq[int] =
+    result = newSeq[int](0)
+    for i in 0..<num_features:
+        if rand(1.0) < max_features:
+            result.add i
 
-proc best_split*[with_index: static[bool]](impurity_f: ImpurityF, X: seq[seq[float]], y: seq[float]): SplitResult {.gcsafe.} =
+proc best_split*[with_index: static[bool]](impurity_f: ImpurityF, X: seq[seq[float]], y: seq[float], max_features: float = 1.0): SplitResult {.gcsafe.} =
     var 
         best_split: SplitResult = new_split_result(-1, Inf)
-    for j in 0..<X[0].len:
-        echo "column ", j
+    for j in random_features(X[0].len, max_features):
+        # echo"column ", j
         let j_split = best_split_col[with_index](impurity_f, X.column(j), y)
         if best_split.impurity > j_split.impurity:
-            echo "new best_split.impurity ",  j_split.impurity
-            echo "new best_split.split_value ",  j_split.split_value
+            # echo"new best_split.impurity ",  j_split.impurity
+            # echo"new best_split.split_value ",  j_split.split_value
             best_split = j_split
             best_split.col = j
     return best_split
