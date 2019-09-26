@@ -10,6 +10,7 @@ type RandomForest* = ref object
     trees: seq[DecisionTree]
     task: Task
     bagging*: float
+    perc_features*: float
     num_classes*: int
     num_threads*: int
 
@@ -17,10 +18,11 @@ proc num_trees*(forest: RandomForest): Natural =
     forest.trees.len
     
 
-proc new_random_forest*(task: Task, n_trees, num_threads: int, bagging: float): RandomForest =
+proc new_random_forest*(task: Task, n_trees, num_threads: int, bagging: float, perc_features: float): RandomForest =
     result = new(RandomForest)
     result.bagging = bagging
     result.num_threads = num_threads
+    result.perc_features = perc_features
     result.trees = newSeq[DecisionTree](n_trees)
 
 proc new_random_forest(trees: seq[DecisionTree]): RandomForest =
@@ -28,12 +30,14 @@ proc new_random_forest(trees: seq[DecisionTree]): RandomForest =
     result.trees = trees
 
 
-proc new_random_forest_classifier*(n_trees: int = 100, num_threads: int = 4, bagging: float = 1.0): RandomForest =
-    new_random_forest(Classification, n_trees, num_threads, bagging)
+proc new_random_forest_classifier*(n_trees: int = 100, num_threads: int = 4, bagging: float = 0.8, perc_features: float = 1.0): RandomForest =
+    new_random_forest(Classification, n_trees, num_threads, bagging, perc_features)
 
+proc new_random_forest_regressor*(n_trees: int = 100, num_threads: int = 4, bagging: float = 0.8, perc_features: float = 1.0): RandomForest =
+    new_random_forest(Regression, n_trees, num_threads, bagging, perc_features)
 
 include parallel_rf
-
+                
 proc fit* (rf: RandomForest, X: seq[seq[float]], y: seq[float]) =
     rf.num_classes = y.uniques(preserve_order=false).len
     for i in 0..<rf.num_trees:
