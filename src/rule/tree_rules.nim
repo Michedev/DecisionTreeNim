@@ -29,6 +29,18 @@ proc add_pre_split_rule* (tr: TreeStopRules, rule: Rule) =
 proc add_post_split_rule* (tr: TreeStopRules, rule: PostSplitRule) =
     tr.post_split_rules.add rule
 
+proc add_creation_rules* (tr: TreeStopRules, rules: seq[Rule]) =
+    for rule in rules:
+        tr.add_creation_rule rule
+
+proc add_pre_split_rules* (tr: TreeStopRules, rules: seq[Rule]) =
+    for rule in rules:
+        tr.add_pre_split_rule rule
+
+proc add_post_split_rules* (tr: TreeStopRules, rules: seq[PostSplitRule]) =
+    for rule in rules:
+        tr.add_post_split_rule rule
+
 proc any_true(rules: seq[Rule], n: INode, X: seq[seq[float]], y: seq[float]): bool {.gcsafe.} =
     for rule in rules:
         if rule(n, X, y):

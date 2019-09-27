@@ -4,4 +4,5 @@
 import tree
 import random_forest/random_forest
 
-
+export tree
+export random_forest

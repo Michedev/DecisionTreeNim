@@ -2,10 +2,7 @@ import node/[node, constructors, traverse]
 import train/[split, sons_gen, train]
 import task
 import typetraits
-import core.typeinfo
-import math
 import sequtils
-import options
 import rule/[tree_rules, stop_rules, bagging]
 
 type 
@@ -33,11 +30,12 @@ proc add_rules(tree: DecisionTree, max_depth: int, min_samples_split: int, max_f
         tree.stop_rules.add_pre_split_rule min_samples_split_rule(min_samples_split)
     if min_impurity_decrease != -1.0:
         tree.stop_rules.add_post_split_rule min_impurity_decrease_rule(min_impurity_decrease)
-    
     tree.stop_rules.add_creation_rule unique_class_rule()
 
 
-proc new_tree (task: Task, max_depth: int, min_samples_split: int, max_features: float, min_impurity_decrease: float, bagging: float): DecisionTree =
+proc new_tree (task: Task, max_depth: int, min_samples_split: int, max_features: float,
+               min_impurity_decrease: float, bagging: float,
+               custom_creation_rules: seq[Rule] = @[],  custom_pre_split_rules: seq[Rule] = @[], custom_post_split_rules: seq[PostSplitRule] = @[]): DecisionTree =
     result = new(DecisionTree)
     assert_int_hp(max_depth)
     assert_int_hp(min_samples_split)
@@ -45,6 +43,7 @@ proc new_tree (task: Task, max_depth: int, min_samples_split: int, max_features:
     assert_positive_float_hp(min_impurity_decrease)
     assert_0_1_float_hp(bagging)
     result.stop_rules = new_tree_stop_rules()
+    
     result.add_rules(max_depth, min_samples_split, max_features, min_impurity_decrease)
     result.root = new_root(task, stop_rules=result.stop_rules)
     result.max_features = max_features
