@@ -22,6 +22,7 @@ proc new_random_forest*(task: Task, n_trees, num_threads: int, h: Hyperparams): 
     result = new(RandomForest)
     result.hyperparams = h
     result.trees = newSeq[DecisionTree](n_trees)
+    result.num_threads = num_threads
 
 proc new_random_forest(trees: seq[DecisionTree]): RandomForest =
     result = new(RandomForest)
@@ -33,12 +34,12 @@ hyperparams_binding(RandomForest)
 proc new_random_forest_classifier*(n_trees: int = 100, max_depth: int = -1, min_samples_split: int = -1,
                                    max_features: float = 1.0, min_impurity_decrease: float = 1e-6,
                                    bagging: float = 1.0, num_threads: int = 1,): RandomForest =
-    new_random_forest(Classification, n_trees, num_threads, (max_depth, min_samples_split, max_features, min_impurity_decrease, bagging))
+    new_random_forest(Classification, n_trees=n_trees, num_threads=num_threads, h=(max_depth, min_samples_split, max_features, min_impurity_decrease, bagging))
 
 proc new_random_forest_regressor*(n_trees: int = 100, max_depth: int = -1, min_samples_split: int = -1,
                                   max_features: float = 1.0, min_impurity_decrease: float = 1e-6,
                                   bagging: float = 1.0, num_threads: int = 1): RandomForest =
-    new_random_forest(Regression, n_trees, num_threads, (max_depth, min_samples_split, max_features, min_impurity_decrease, bagging))
+    new_random_forest(Regression, n_trees=n_trees, num_threads=num_threads, h=(max_depth, min_samples_split, max_features, min_impurity_decrease, bagging))
 
 include parallel_rf
                 

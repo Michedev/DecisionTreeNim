@@ -4,7 +4,6 @@ import system
 import math
 import ../utils
 import random
-
 import splitresult
 
 type ImpurityF = proc(y: seq[float]): float
@@ -48,51 +47,41 @@ proc percentiles(data: seq[float]): seq[float] =
         result.add with_next
     result = result[1..(result.len-2)]
 
-proc split_y_by_value[with_index: static[bool]](x_col, y: seq[float], split_value: float): tuple[y1, y2: seq[float], i1, i2: seq[int]] =
-    var y1 = new_seq[float](0)
-    var y2 = new_seq[float](0)
-    when with_index:
-        var i1 = new_seq[int](0)
-        var i2 = new_seq[int](0)
+proc split_y_by_value(x_col, y: seq[float], split_value: float): tuple[y1, y2: seq[float], i1, i2: seq[int]] =
+    var 
+        y1 = new_seq[float](0)
+        y2 = new_seq[float](0)
+        i1 = new_seq[int](0)
+        i2 = new_seq[int](0)
     for i, v in x_col:
         if v < split_value:
             y1.add y[i]
-            when with_index:
-                i1.add i
+            i1.add i
         else:
             y2.add y[i]
-            when with_index:
-                i2.add i
-    when with_index:
-        return (y1, y2, i1, i2)
-    else:
-        return (y1, y2, @[], @[])
+            i2.add i
+    return (y1, y2, i1, i2)
 
 
-proc best_split_col[with_index: static[bool]](impurity_f: ImpurityF, x_col: seq[float], y: seq[float]): SplitResult {.gcsafe.} =
+proc best_split_col(impurity_f: ImpurityF, x_col: seq[float], y: seq[float]): SplitResult {.gcsafe.} =
     assert x_col.len == y.len
     let splits = percentiles(x_col)
     # echo"splits: ", splits
     var min_impurity = Inf
     var best_split = 0.0
-    when with_index:
-        var best_i1: seq[int]
-        var best_i2: seq[int]
+    var best_i1: seq[int]
+    var best_i2: seq[int]
     for split in splits:
-        let (y1, y2, i1, i2) = split_y_by_value[with_index](x_col, y, split)
+        let (y1, y2, i1, i2) = split_y_by_value(x_col, y, split)
         let impurity_y1 = impurity_f(y1)
         let impurity_y2 = impurity_f(y2)
         let tot_impurity: float = impurity_y1 + impurity_y2
         if min_impurity > tot_impurity:
             min_impurity = tot_impurity
             best_split = split
-            when with_index:
-                best_i1 = i1
-                best_i2 = i2
-    when with_index:
-        return new_split_result(best_split, min_impurity, -1, [best_i1, best_i2])
-    else:
-        return new_split_result(best_split, min_impurity)
+            best_i1 = i1
+            best_i2 = i2
+    return new_split_result(best_split, min_impurity, -1, [best_i1, best_i2])
 
 proc random_features(num_features: int, max_features: float): seq[int] =
     result = newSeq[int](0)
@@ -100,15 +89,12 @@ proc random_features(num_features: int, max_features: float): seq[int] =
         if rand(1.0) < max_features:
             result.add i
 
-proc best_split*[with_index: static[bool]](impurity_f: ImpurityF, X: seq[seq[float]], y: seq[float], max_features: float = 1.0): SplitResult {.gcsafe.} =
+proc best_split*(impurity_f: ImpurityF, X: seq[seq[float]], y: seq[float], max_features: float = 1.0): SplitResult {.gcsafe.} =
     var 
         best_split: SplitResult = new_split_result(-1, Inf)
     for j in random_features(X[0].len, max_features):
-        # echo"column ", j
-        let j_split = best_split_col[with_index](impurity_f, X.column(j), y)
+        let j_split = best_split_col(impurity_f, X.column(j), y)
         if best_split.impurity > j_split.impurity:
-            # echo"new best_split.impurity ",  j_split.impurity
-            # echo"new best_split.split_value ",  j_split.split_value
             best_split = j_split
             best_split.col = j
     return best_split
