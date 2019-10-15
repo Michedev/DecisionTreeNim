@@ -1,7 +1,7 @@
 import node
 
 
-method get_value*(n: Node, x: seq[float]): float {.gcsafe.} =
+method get_value*(n: Node, x: seq[float]): float {.base, gcsafe.} =
     let value = x[n.split_column]
     let i = (value > n.split_value).int
     return n.sons[i].get_value(x)

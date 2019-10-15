@@ -55,9 +55,7 @@ proc fit* (rf: RandomForest, X: seq[seq[float]], y: seq[float]) =
     
                 
     
-proc predict_row*(rf: RandomForest, x: seq[float]): float {.gcsafe.} =
-    if rf.num_threads > 1:
-        return rf.predict_parallel(x, predict_row)
+proc predict*(rf: RandomForest, x: seq[float]): float {.gcsafe.} =
     let predictions = rf.trees.map_it(it.predict(x))
     case rf.task:
         of Classification:
@@ -65,16 +63,10 @@ proc predict_row*(rf: RandomForest, x: seq[float]): float {.gcsafe.} =
         of Regression:
             return predictions.mean()
 
-proc predict*(rf: RandomForest, x: seq[float]): float =
-    rf.predict_row(x);
-            
-
 proc predict*(rf: RandomForest, X: seq[seq[float]]): seq[float] {.gcsafe.} =
-    X.map_it(rf.predict_row(it))
+    X.map_it(rf.predict(it))
     
-proc predict_proba_row*(forest: RandomForest, x: seq[float]): seq[float] {.gcsafe.} =
-    if forest.num_threads > 1:
-        return forest.predict_proba_parallel(x, predict_proba_row)
+proc predict_proba*(forest: RandomForest, x: seq[float]): seq[float] {.gcsafe.} =
     result = new_seq[float](forest.num_classes)
     for t in forest.trees:
         let p_y = t.predict_proba(x)
@@ -84,4 +76,4 @@ proc predict_proba_row*(forest: RandomForest, x: seq[float]): seq[float] {.gcsaf
         result[i_class] /= forest.num_trees.float
 
 proc predict_proba*(forest: RandomForest, X: seq[seq[float]]): seq[seq[float]]  =
-    X.mapIt(forest.predict_proba_row(it))
+    X.mapIt(forest.predict_proba(it))
