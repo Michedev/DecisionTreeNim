@@ -12,13 +12,13 @@ proc fit* (root: Node, X: seq[seq[float]], y: seq[float]) {.gcsafe.} =
     while border.len > 0:
         let (node, X_data, y_data) = border.pop()
         let sons_opt = node.generate_sons(X_data, y_data)
-        if isSome(sons_opt):
+        if sons_opt.is_some():
             let sons = sons_opt.get()
             if not(sons.first of Leaf):
                 border.add((sons.first, sons.X1, sons.y1))
             if not(sons.second of Leaf):
                 border.add((sons.second, sons.X2, sons.y2))
-        elif not node.father.isNil():
+        elif sons_opt.is_none() and not node.father.isNil():
             let father = node.father
             if father.num_sons == 0:
                 father.sons[0] = new_leaf(father, X_data, y_data)
