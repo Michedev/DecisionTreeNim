@@ -84,7 +84,7 @@ proc split_y_by_value(x_col, y: seq[float], split_value: float): tuple[y1, y2: s
 
 proc best_split_col(impurity_f: ImpurityF, x_col: seq[float], y: seq[float]): SplitResult {.gcsafe.} =
     assert x_col.len == y.len
-    let splits = uniform_values[5](x_col)
+    let splits = uniform_values[10](x_col)
     var min_impurity = Inf
     var best_split = 0.0
     var best_i1: seq[int]
