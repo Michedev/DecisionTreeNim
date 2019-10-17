@@ -15,7 +15,7 @@ import decision_tree
 
 let dt = new_classification_tree(max_depth=10)
 dt.fit(X_train,y_train)
-let yhat = dt.predict(X_test) #or predict_proba
+let yhat = dt.predict(X_test)
 
 ```
 
@@ -26,5 +26,5 @@ import decision_tree
 
 let rf = new_random_forest_classifier(n_trees=100, num_threads=4)
 rf.fit(X_train, y_train)
-let yhat = rf.predict(X_test) #or predict_proba
+let yhat = rf.predict(X_test)
 ```
