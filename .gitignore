@@ -1,2 +1,5 @@
 tests/test_fit_tree
 tests/test_impurity
+callgrind*
+benchmark/rf_dtnim
+.vscode/settings.json
