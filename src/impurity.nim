@@ -1,21 +1,22 @@
 import tables
 import math
-import sequtils
+import options
 
-proc summary_prob(y: seq[float], f_prob: proc(p: float): float): float {.gcsafe.} =
-    let counter = y.to_count_table()
+type
+    ImpurityF* = proc(y: seq[float]): float {.gcsafe.}
+
+func summary_prob(probs: seq[float], f_prob: proc(p: float): float {.gcsafe, inline, nosideeffect.}): float {.gcsafe.}  =
     result = 0.0
-    for freq in counter.values:
-        let prob = freq.float / y.len().float
+    for prob in probs:
         result += f_prob(prob)
 
-proc entropy_function(p: float): float {.gcsafe.} =
+func entropy_function(p: float): float {.gcsafe, inline.} =
     - (p * ln(p))
 
 proc entropy*(y: seq[float]): float {.gcsafe.} =
     summary_prob(y, entropy_function)
 
-proc gini_function(p: float): float {.gcsafe.} =
+func gini_function(p: float): float {.gcsafe, inline.} =
     p * (1 - p)
 
 proc gini*(y: seq[float]): float {.gcsafe.} =

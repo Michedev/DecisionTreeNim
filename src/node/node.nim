@@ -1,5 +1,6 @@
 import ../task
 import ../rule/tree_rules
+import ../impurity
 
 type 
         Node* = ref object of RootObj
@@ -11,7 +12,7 @@ type
                 level*: Natural
                 max_features*: float
                 tree_task*: Task
-                impurity*: proc(y: seq[float]): float {.gcsafe.}
+                impurity*: ImpurityF
                 stop_rules*: TreeStopRules
         Leaf* = ref object of Node
                 leaf_f*: proc(x: seq[float]): float {.gcsafe.}

@@ -1,5 +1,5 @@
 import ../node/node, ../node/constructors, ../node/leaf
-import split, stop, splitresult
+import split, splitresult
 import typetraits
 import ../rule/tree_rules
 import options
@@ -8,7 +8,8 @@ type Sons = tuple[first, second: Node, X1, X2: seq[seq[float]], y1, y2: seq[floa
 
 proc generate_sons*(n: Node, X: seq[seq[float]], y: seq[float]): Option[Sons] {.gcsafe.} =
     let split: SplitResult = best_split(n.impurity, X, y, n.max_features)
-    # echo"Split on ", split.col, " with value ",  split.split_value
+    if split.impurity == Inf:
+        return options.none[Sons]()
     n.split_column = split.col
     n.split_value  = split.split_value
     let
