@@ -9,6 +9,7 @@ import splitresult
 import options
 import ../impurity
 import tables
+import times
 
 proc new_split_result(split_value, impurity: float): SplitResult =
     result = new(SplitResult)
@@ -115,10 +116,10 @@ proc best_split_col(impurity_f: ImpurityF, x_col: seq[float], y: seq[float]): Sp
     return new_split_result(best_split, min_impurity, -1, [best_i1, best_i2])
 
 proc random_features(num_features: int, max_features: float): seq[int] =
-    result = newSeq[int](0)
-    for i in 0..<num_features:
-        if rand(1.0) < max_features:
-            result.add i
+    var sampled_features = (max_features * num_features.float).ceil.int
+    return generate_random_sequence(num_features-1, sampled_features)
+
+        
 
 proc best_split*(impurity_f: ImpurityF, X: seq[seq[float]], y: seq[float], max_features: float = 1.0): SplitResult {.gcsafe.} =
     var 

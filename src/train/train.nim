@@ -23,10 +23,11 @@ proc fit* (root: Node, X: seq[seq[float]], y: seq[float]) {.gcsafe.} =
             if father.num_sons == 0:
                 father.sons[0] = new_leaf(father, X_data, y_data)
             else:
-                for i in 0..<father.num_sons:
+                for i in 0..<min(father.num_sons, 2):
                     let son = father.sons[i]
                     if son == node:
                         father.num_sons -= 1
                         father.sons[i] = new_leaf(father, X_data, y_data)
+                        break
         else:
             raise newException(RootIsLeaf, "Root is leaf")

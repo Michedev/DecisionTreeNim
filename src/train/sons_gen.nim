@@ -7,7 +7,9 @@ import options
 type Sons = tuple[first, second: Node, X1, X2: seq[seq[float]], y1, y2: seq[float]]
 
 proc generate_sons*(n: Node, X: seq[seq[float]], y: seq[float]): Option[Sons] {.gcsafe.} =
+    # echo "level ", n.level
     let split: SplitResult = best_split(n.impurity, X, y, n.max_features)
+    # echo "split.impurity: ", split.impurity
     if split.impurity == Inf:
         return options.none[Sons]()
     n.split_column = split.col
@@ -29,7 +31,10 @@ proc generate_sons*(n: Node, X: seq[seq[float]], y: seq[float]): Option[Sons] {.
     for i_indx, indx in split.index[1]:
         X2[i_indx] = X[indx]
         y2[i_indx] = y[indx]
-    
+    # echo X1
+    # echo y1
+    # echo X2
+    # echo y2
     if n.stop_rules.on_creation(n, X1, y1):
         # echo"create new leaf for son number ", i+1
         n.sons[0] = new_leaf(n, X1, y1)

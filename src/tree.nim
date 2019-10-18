@@ -29,8 +29,8 @@ proc add_rules(tree: DecisionTree, max_depth: int, min_samples_split: int, max_f
         tree.stop_rules.add_creation_rule max_depth_rule(max_depth)
     if min_samples_split != -1:
         tree.stop_rules.add_pre_split_rule min_samples_split_rule(min_samples_split)
-    if min_impurity_decrease != -1.0:
-        tree.stop_rules.add_post_split_rule min_impurity_decrease_rule(min_impurity_decrease)
+    # if min_impurity_decrease != -1.0:
+    #     tree.stop_rules.add_post_split_rule min_impurity_decrease_rule(min_impurity_decrease)
     tree.stop_rules.add_creation_rule unique_class_rule()
 
 
@@ -47,7 +47,7 @@ proc new_tree*(task: Task, h: Hyperparams,
     result.stop_rules = new_tree_stop_rules()
     
     result.add_rules(h.max_depth, h.min_samples_split, h.max_features, h.min_impurity_decrease)
-    result.root = new_root(task, stop_rules=result.stop_rules)
+    result.root = new_root(task, stop_rules=result.stop_rules, max_features=h.max_features)
     result.hyperparams = h
 
 
@@ -68,7 +68,7 @@ proc fit* (t: DecisionTree, X: seq[seq[float]], y: seq[float]) {.gcsafe.} =
     if t.bagging < 1.0:
         (X_train, y_train) = bagging(X_train, y_train, t.bagging)
     try:
-        fit(t.root, X_train, y_train)
+        t.root.fit(X_train, y_train)
     except RootIsLeaf:
         t.root = new_root_leaf(X_train,y_train)
 

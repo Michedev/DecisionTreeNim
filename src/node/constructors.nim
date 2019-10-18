@@ -16,6 +16,7 @@ proc new_leaf*(father: Node, X: seq[seq[float]], y: seq[float]): Leaf =
     result.leaf_f = result.get_leaf_func(X, y)
     result.num_sons = 0
     result.father = father
+    father.num_sons += 1
 
 proc new_son*(father: Node): Node =
     result = new(Node)
