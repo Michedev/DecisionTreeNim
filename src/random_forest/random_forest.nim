@@ -6,6 +6,7 @@ import random
 import stats
 import sequtils2
 import ../hyperparams
+import neo
 
 type RandomForest* = ref object
     trees: seq[DecisionTree]
@@ -43,8 +44,8 @@ proc new_random_forest_regressor*(n_trees: int = 100, max_depth: int = -1, min_s
 
 include parallel_rf
                 
-proc fit* (rf: RandomForest, X: seq[seq[float]], y: seq[float]) =
-    rf.num_classes = y.uniques(preserve_order=false).len
+proc fit* (rf: RandomForest, X: Matrix[float], y: Vector[float]) =
+    # rf.num_classes = y.uniques(preserve_order=false).len
     for i in 0..<rf.num_trees:
         rf.trees[i] = new_tree(rf.task, rf.hyperparams)
     if rf.num_threads > 1:
@@ -52,28 +53,43 @@ proc fit* (rf: RandomForest, X: seq[seq[float]], y: seq[float]) =
     else:
         for tree in rf.trees:
             tree.fit(X, y)
-    
+
+
+proc fit* (rf: RandomForest, X: seq[seq[float]], y: seq[float]) =
+    rf.fit(matrix(X), vector(y))
                 
     
-proc predict*(rf: RandomForest, x: seq[float]): float {.gcsafe.} =
-    let predictions = rf.trees.map_it(it.predict(x))
+proc predict*(rf: RandomForest, x: Vector[float]): float {.gcsafe.} =
     case rf.task:
         of Classification:
-            return predictions.toCountTable().largest.key
+            var ct = newCountTable[float](16)
+            for t in rf.trees:
+                ct.inc t.predict(x)
+            return ct.largest[0]
         of Regression:
-            return predictions.mean()
+            var tot = 0.0
+            for t in rf.trees:
+                tot += t.predict(x)
+            return tot / rf.trees.len.toFloat
 
-proc predict*(rf: RandomForest, X: seq[seq[float]]): seq[float] {.gcsafe.} =
-    X.map_it(rf.predict(it))
-    
-proc predict_proba*(forest: RandomForest, x: seq[float]): seq[float] {.gcsafe.} =
-    result = new_seq[float](forest.num_classes)
-    for t in forest.trees:
-        let p_y = t.predict_proba(x)
-        for i_class in 0..<forest.num_classes:
-            result[i_class] += p_y[i_class]
-    for i_class in 0..<forest.num_classes:
-        result[i_class] /= forest.num_trees.float
+proc predict*(rf: RandomForest, X: Matrix[float]): Vector[float] {.gcsafe.} =
+    result = zeros(X.M)
+    for i in 0..<X.M:
+        let x = X.row(i)
+        result[i] = rf.predict(x)
 
-proc predict_proba*(forest: RandomForest, X: seq[seq[float]]): seq[seq[float]]  =
-    X.mapIt(forest.predict_proba(it))
+proc predict*(rf: RandomForest, X: seq[seq[float]]): Vector[float] {.gcsafe.} =
+    return rf.predict(matrix(X))
+        
+   
+# proc predict_proba*(forest: RandomForest, x: Vector[float]): Vector[float] {.gcsafe.} =
+#     result = zeros(forest.num_classes)
+#     for t in forest.trees:
+#         let p_y = t.predict_proba(x)
+#         for i_class in 0..<forest.num_classes:
+#             result[i_class] += p_y[i_class]
+#     for i_class in 0..<forest.num_classes:
+#         result[i_class] /= forest.num_trees.float
+
+# proc predict_proba*(forest: RandomForest, X: Matrix[float]): Matrix[float]  =
+#     X.mapIt(forest.predict_proba(it))

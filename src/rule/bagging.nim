@@ -1,16 +1,13 @@
 import ../utils
 import math
-type Xy* = tuple[X: seq[seq[float]], y: seq[float]]
+import neo
+import ../matrix_view
+import sequtils
+type Xy* {.shallow.} = tuple[X: MatrixView[float], y: VectorView[float]]
 
-proc bagging*(X: seq[seq[float]], y: seq[float], perc_bagging:float): Xy =
-    var 
-        init_len = (y.len.float * perc_bagging).ceil.int
-        X_bagged: seq[seq[float]] = new_seq[seq[float]](init_len)
-        y_bagged: seq[float] = new_seq[float](init_len)
-    var ixs_keep = generate_random_sequence(X.len - 1, init_len)
-    var i_new_train = 0
-    for ix_keep in ixs_keep:
-        X_bagged[i_new_train] = X[ix_keep]
-        y_bagged[i_new_train] = y[ix_keep]
-        inc i_new_train
+proc bagging*(X: Matrix[float], y: Vector[float], perc_bagging:float): Xy =
+    let init_len = (y.len.float * perc_bagging).ceil.int
+    let ixs_keep = generate_random_sequence(X.M - 1, init_len)
+    let X_bagged = new_matrix_view(X, ixs_keep)
+    let y_bagged = new_vector_view(y, ixs_keep)
     return (X_bagged, y_bagged)

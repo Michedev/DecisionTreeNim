@@ -3,10 +3,13 @@ import split, splitresult
 import typetraits
 import ../rule/tree_rules
 import options
+import neo
+import ../matrix_view
 
-type Sons = tuple[first, second: Node, X1, X2: seq[seq[float]], y1, y2: seq[float]]
 
-proc generate_sons*(n: Node, X: seq[seq[float]], y: seq[float]): Option[Sons] {.gcsafe.} =
+type Sons {.shallow.} = tuple[first, second: Node, X1, X2: MatrixView[float], y1, y2: VectorView[float]]
+
+proc generate_sons*(n: Node, X: MatrixView[float], y: VectorView[float]): Option[Sons] {.gcsafe.} =
     # echo "level ", n.level
     let split: SplitResult = best_split(n.impurity, X, y, n.max_features)
     # echo "split.impurity: ", split.impurity
@@ -15,26 +18,15 @@ proc generate_sons*(n: Node, X: seq[seq[float]], y: seq[float]): Option[Sons] {.
     n.split_column = split.col
     n.split_value  = split.split_value
     let
-        x1_len = split.index[0].len
-        x2_len = split.index[1].len
-    var 
-        X1 = new_seq[seq[float]](x1_len)
-        y1 = new_seq[float](x1_len)
-        X2: seq[seq[float]] = new_seq[seq[float]](x2_len)
-        y2 = new_seq[float](x2_len)
+        x1_len = split.i1.len
+        x2_len = split.i2.len 
+        X1 = new_matrix_view(X, split.i1, X.col_index)
+        y1 = new_vector_view(y, split.i1)
+        X2 = new_matrix_view(X, split.i2, X.col_index)
+        y2 = new_vector_view(y, split.i2)
     if n.stop_rules.on_post_split(n, X, y, X1, y1, X2, y2):
         # echo "Split negated on depth ", n.level
         return options.none[Sons]()     
-    for i_indx, indx in split.index[0]:
-        X1[i_indx] = X[indx]
-        y1[i_indx] = y[indx]
-    for i_indx, indx in split.index[1]:
-        X2[i_indx] = X[indx]
-        y2[i_indx] = y[indx]
-    # echo X1
-    # echo y1
-    # echo X2
-    # echo y2
     if n.stop_rules.on_creation(n, X1, y1):
         # echo"create new leaf for son number ", i+1
         n.sons[0] = new_leaf(n, X1, y1)

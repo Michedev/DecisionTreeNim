@@ -1,11 +1,14 @@
 import tables
 import math
 import options
+import neo
+import matrix_view
+
 
 type
-    ImpurityF* = proc(y: seq[float]): float {.gcsafe.}
+    ImpurityF* = proc(y: Vector[float]): float {.gcsafe.}
 
-func summary_prob(probs: seq[float], f_prob: proc(p: float): float {.gcsafe, inline, nosideeffect.}): float {.gcsafe.}  =
+func summary_prob(probs: Vector[float], f_prob: proc(p: float): float {.gcsafe, inline, nosideeffect.}): float {.gcsafe.}  =
     result = 0.0
     for prob in probs:
         result += f_prob(prob)
@@ -13,17 +16,17 @@ func summary_prob(probs: seq[float], f_prob: proc(p: float): float {.gcsafe, inl
 func entropy_function(p: float): float {.gcsafe, inline.} =
     - (p * ln(p))
 
-proc entropy*(y: seq[float]): float {.gcsafe.} =
+proc entropy*(y: Vector[float]): float {.gcsafe.} =
     summary_prob(y, entropy_function)
 
 func gini_function(p: float): float {.gcsafe, inline.} =
     p * (1 - p)
 
-proc gini*(y: seq[float]): float {.gcsafe.} =
+proc gini*(y: Vector[float]): float {.gcsafe.} =
     summary_prob(y, gini_function)
 
-proc mse_from_mean*(y: seq[float]): float {.gcsafe.} =
+proc mse_from_mean*(y: Vector[float]): float {.gcsafe.} =
     result = 0.0
-    let mean = y.sum() / y.len().float
+    let mean_value = y.mean()
     for value in y:
-        result += (value - mean) * (value - mean)
+        result += (value - mean_value) * (value - mean_value)

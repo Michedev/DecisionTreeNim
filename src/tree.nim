@@ -5,9 +5,10 @@ import typetraits
 import sequtils
 import rule/[tree_rules, stop_rules, bagging]
 import hyperparams
+import neo
 
 type 
-    DecisionTree*  = ref object
+    DecisionTree* {.shallow.} = ref object
         root: Node
         stop_rules: TreeStopRules
         hyperparams: Hyperparams
@@ -62,15 +63,16 @@ proc new_regression_tree* (max_depth: int = -1, min_samples_split: int = -1, max
 
 
 ## Train function of decision tree
-proc fit* (t: DecisionTree, X: seq[seq[float]], y: seq[float]) {.gcsafe.} =
-    var X_train = X
-    var y_train = y
-    if t.bagging < 1.0:
-        (X_train, y_train) = bagging(X_train, y_train, t.bagging)
+proc fit* (t: DecisionTree, X: Matrix[float], y: Vector[float]) {.gcsafe.} =
+    let (X_train, y_train) = bagging(X, y, t.bagging)
     try:
         t.root.fit(X_train, y_train)
     except RootIsLeaf:
         t.root = new_root_leaf(X_train,y_train)
+
+proc fit* (t: DecisionTree, X: seq[seq[float]], y: seq[float]) {.gcsafe.} =
+    t.fit(matrix(X), vector(y))
+
 
 proc print_root_split*(t: DecisionTree) =
     if t.root of Leaf:
@@ -78,14 +80,20 @@ proc print_root_split*(t: DecisionTree) =
     else:
         echo "Root node, split in column ", t.root.split_column, " with value ", t.root.split_value
             
-proc predict*(tree: DecisionTree, x: seq[float]): float {.gcsafe.} =
+proc predict*(tree: DecisionTree, x: Vector[float]): float {.gcsafe.} =
     tree.root.get_value(x)
 
-proc predict*(tree: DecisionTree, X: seq[seq[float]]): seq[float] {.gcsafe.} =
-    X.map_it(tree.predict(it))
+proc predict*(tree: DecisionTree, X: Matrix[float]): Vector[float] {.gcsafe.} =
+    result = zeros(X.M)
+    for i in 0..<X.M:
+        let x = X.row(i)
+        result[i] = tree.predict(x)
 
-proc predict_proba*(tree: DecisionTree, x: seq[float]): seq[float] {.gcsafe.} =
-    tree.root.get_proba(x)
+proc predict*(tree: DecisionTree, X: seq[seq[float]]): Vector[float] {.gcsafe.} =
+    tree.predict(matrix(X))
 
-proc predict_proba*(tree: DecisionTree, X: seq[seq[float]]): seq[seq[float]] {.gcsafe.} =
-    X.map_it(tree.predict_proba(it))
+# proc predict_proba*(tree: DecisionTree, x: Vector[float]): Vector[float] {.gcsafe.} =
+#     tree.root.get_proba(x)
+
+# proc predict_proba*(tree: DecisionTree, X: Matrix[float]): Matrix[float] {.gcsafe.} =
+#     X.map_it(tree.predict_proba(it))

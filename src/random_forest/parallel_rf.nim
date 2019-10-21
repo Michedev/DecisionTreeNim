@@ -2,11 +2,11 @@ import sequtils
 import threadpool
 
 #for parallel use only
-proc tree_fit(tree: DecisionTree, X: ptr seq[seq[float]], y: ptr seq[float]): DecisionTree {.thread.} =
+proc tree_fit(tree: DecisionTree, X: ptr Matrix[float], y: ptr Vector[float]): DecisionTree {.thread.} =
     tree.fit(X[], y[])
     return tree
 
-proc fit_parallel*(forest: RandomForest, X: seq[seq[float]], y: seq[float]) =
+proc fit_parallel*(forest: RandomForest, X: Matrix[float], y: Vector[float]) =
     let trees_per_thread: int = (forest.num_trees.float / forest.num_threads.float).int
     echo "trees per thread: ", trees_per_thread
     var threads = newSeq[FlowVar[DecisionTree]](forest.num_trees)

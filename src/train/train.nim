@@ -1,12 +1,14 @@
 import ../node/[node, constructors]
 import sons_gen
+import neo
 import options
+import ../matrix_view
 
-type NodeWithData = tuple[n: Node, X: seq[seq[float]], y: seq[float]]
+type NodeWithData {.shallow.} = tuple[n: Node, X: MatrixView[float], y: VectorView[float]]
 
 ## Train function of decision tree
-proc fit* (root: Node, X: seq[seq[float]], y: seq[float]) {.gcsafe.} =
-    assert X.len == y.len
+proc fit* (root: Node, X: MatrixView[float], y: VectorView[float]) {.gcsafe.} =
+    assert X.M == y.len
     var border = new_seq[NodeWithData](1)
     border[0] = (root, X, y)
     while border.len > 0:
