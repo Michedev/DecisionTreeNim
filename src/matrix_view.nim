@@ -2,17 +2,17 @@ import neo
 import utils
 
 type 
-    MatrixView*[T: int|float] {.shallow.} = ref object
+    MatrixView*[T: int|float] {.shallow.} = ref object of RootObj
         row_index*: seq[int] 
         col_index*: seq[int]
-        original: Matrix[T]
-    VectorView*[T: int|float] {.shallow.} = ref object
+        original*: Matrix[T]
+    VectorView*[T: int|float] {.shallow.} = ref object of RootObj
         index*: seq[int]
-        original: Vector[T]
-    ColMatrixView*[T: int|float] {.shallow.} = ref object
-        row_index: seq[int]
-        col_index: int
-        original: Matrix[T]
+        original*: Vector[T]
+    ColMatrixView*[T: int|float] {.shallow.} = ref object of RootObj
+        row_index*: seq[int]
+        col_index*: int
+        original*: Matrix[T]
 
 proc M*[T: int|float](m: MatrixView[T]): int {.inline.} =
     m.row_index.len
@@ -43,7 +43,7 @@ proc new_matrix_view*[T: int|float](m: Matrix[T], row_index: seq[int]): MatrixVi
     ##Create matrix view taking all columns
     result = new(MatrixView[T])
     result.row_index := row_index
-    result.col_index := (0..<m.N).toSeq
+    result.col_index := ((0..<m.N).toSeq)
     result.original = m
 
 proc new_matrix_view*[T: int|float](m: MatrixView[T], row_index, col_index: seq[int]): MatrixView[T] =
@@ -71,20 +71,28 @@ proc new_vector_view*[T: int|float](v: VectorView[T], index: seq[int]): VectorVi
     result.index := index
     result.original = v.original
 
-proc `[]`*[T: int|float](v: VectorView[T], i: int): T =
+proc new_col_matrix_view*[T: int|float](m: MatrixView[T], j: Natural, row_index: seq[int]): ColMatrixView[T] =
+    result = new(ColMatrixView[T])
+    result.original = m.original
+    result.col_index = j
+    result.row_index := row_index
+    
+    
+func `[]`*[T: int|float](v: VectorView[T], i: int): T =
     v.original[v.index[i]]
     
-proc `[]`*[T: int|float](v: ColMatrixView[T], i: int): T =
+func `[]`*[T: int|float](v: ColMatrixView[T], i: int): T =
     v.original[v.row_index[i], v.col_index]
     
 
-func shape*[T: int|float](m: MatrixView[T]): array[2, int] = (m.row_index.len, m.col_index.len)
+func shape*[T: int|float](m: MatrixView[T]): array[2, int] = [m.row_index.len, m.col_index.len]
 
 proc column*[T: int|float](m: MatrixView[T], j: Natural): ColMatrixView[T] =
     result = new(ColMatrixView[T])
     result.original = m.original
     result.col_index = j
     result.row_index := m.row_index
+
 
 proc row*[T: int|float](m: MatrixView[T], i: Natural): VectorView[T] =
     new_vector_view(m.original.row(i), m.col_index)
@@ -102,7 +110,7 @@ iterator pairs*[T: int|float](v: ColMatrixView[T]): tuple[i: int, value: T] =
 
 iterator items*[T: int|float](v: VectorView[T]): T =
     for i in v.index:
-        yield v.original[i]
+        yield v.original[i]      
     
 
 iterator pairs*[T: int|float](v: VectorView[T]): tuple[i: int, value: T] =
@@ -126,4 +134,10 @@ iterator rows*[T: int|float](m: MatrixView[T]): Vector[T] =
 proc to_vector*[T: int|float](v: VectorView[T]): Vector[T] =
     result = zeros[T](v.len)
     for i, value in v:
+        result[i] = value
+
+
+proc toSeq*[T: int|float](vector: ColMatrixView[T]): seq[T] =
+    result = new_seq[int](vector.row_index.len)
+    for i, value in vector:
         result[i] = value

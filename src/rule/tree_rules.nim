@@ -1,10 +1,11 @@
 import ../node/inode
 import neo
 import ../matrix_view
+import ../matrix_view_sorted
 
 type 
-    Rule* = proc(n: INode, X: MatrixView[float], y: VectorView[float]): bool {.gcsafe.}
-    PostSplitRule* = proc(n: INode, X: MatrixView[float], y: VectorView[float], X1: MatrixView[float], y1: VectorView[float], X2: MatrixView[float], y2: VectorView[float]): bool {.gcsafe.}
+    Rule* = proc(n: INode, X: MatrixViewSorted[float], y: VectorView[float]): bool {.gcsafe.}
+    PostSplitRule* = proc(n: INode, X: MatrixViewSorted[float], y: VectorView[float], X1: MatrixViewSorted[float], y1: VectorView[float], X2: MatrixViewSorted[float], y2: VectorView[float]): bool {.gcsafe.}
     TreeStopRules*  = ref object
         ## Rules checked when a new son node is created. If one or more stop rules are true, then makes a leaf instead of internal node 
         creation_rules: seq[Rule]
@@ -43,23 +44,23 @@ proc add_post_split_rules* (tr: TreeStopRules, rules: seq[PostSplitRule]) =
     for rule in rules:
         tr.add_post_split_rule rule
 
-proc any_true(rules: seq[Rule], n: INode, X: MatrixView[float], y: VectorView[float]): bool {.gcsafe.} =
+proc any_true(rules: seq[Rule], n: INode, X: MatrixViewSorted[float], y: VectorView[float]): bool {.gcsafe.} =
     for rule in rules:
         if rule(n, X, y):
             return true
     return false
 
-proc any_true(rules: seq[PostSplitRule], n: INode, X: MatrixView[float], y: VectorView[float], X1: MatrixView[float], y1: VectorView[float], X2: MatrixView[float], y2: VectorView[float]): bool {.gcsafe.} =
+proc any_true(rules: seq[PostSplitRule], n: INode, X: MatrixViewSorted[float], y: VectorView[float], X1: MatrixViewSorted[float], y1: VectorView[float], X2: MatrixViewSorted[float], y2: VectorView[float]): bool {.gcsafe.} =
     for rule in rules:
         if rule(n, X, y, X1, y1, X2, y2):
             return true
     return false
 
-proc on_creation*(tsr: TreeStopRules, n: INode, X: MatrixView[float], y: VectorView[float]): bool {.gcsafe.} =
+proc on_creation*(tsr: TreeStopRules, n: INode, X: MatrixViewSorted[float], y: VectorView[float]): bool {.gcsafe.} =
     any_true(tsr.creation_rules, n, X, y)
 
-proc on_pre_split*(tsr: TreeStopRules, n: INode, X: MatrixView[float], y: VectorView[float]): bool {.gcsafe.} =
+proc on_pre_split*(tsr: TreeStopRules, n: INode, X: MatrixViewSorted[float], y: VectorView[float]): bool {.gcsafe.} =
     any_true(tsr.pre_split_rules, n, X, y)
 
-proc on_post_split*(tsr: TreeStopRules, n: INode, X: MatrixView[float], y: VectorView[float], X1: MatrixView[float], y1: VectorView[float], X2: MatrixView[float], y2: VectorView[float]): bool {.gcsafe.} =
+proc on_post_split*(tsr: TreeStopRules, n: INode, X: MatrixViewSorted[float], y: VectorView[float], X1: MatrixViewSorted[float], y1: VectorView[float], X2: MatrixViewSorted[float], y2: VectorView[float]): bool {.gcsafe.} =
     any_true(tsr.post_split_rules, n, X, y, X1, y1, X2, y2)

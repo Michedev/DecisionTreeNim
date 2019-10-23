@@ -3,11 +3,12 @@ import sons_gen
 import neo
 import options
 import ../matrix_view
+import ../matrix_view_sorted
 
-type NodeWithData {.shallow.} = tuple[n: Node, X: MatrixView[float], y: VectorView[float]]
+type NodeWithData {.shallow.} = tuple[n: Node, X: MatrixViewSorted[float], y: VectorView[float]]
 
 ## Train function of decision tree
-proc fit* (root: Node, X: MatrixView[float], y: VectorView[float]) {.gcsafe.} =
+proc fit* (root: Node, X: MatrixViewSorted[float], y: VectorView[float]) {.gcsafe.} =
     assert X.M == y.len
     var border = new_seq[NodeWithData](1)
     border[0] = (root, X, y)

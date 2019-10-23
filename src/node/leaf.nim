@@ -5,12 +5,16 @@ import tables
 import neo
 import ../utils
 import ../matrix_view
+import ../matrix_view_sorted
 
-proc get_leaf_func*(n: Node, X: MatrixView[float], y: VectorView[float]) : proc(x: Vector[float]): float {.gcsafe.} =
+proc get_leaf_func*(n: Node, X: MatrixViewSorted[float], y: VectorView[float]) : proc(x: Vector[float]): float {.gcsafe.} =
     let y_vector: Vector[float] = y.to_vector()
+    # echo "leaf creation"
+    # echo y_vector
     if n.tree_task == Classification:
         var ctable = y_vector.toCountTable()
         let mode: float = ctable.largest[0]
+        # echo "Mode = ", mode
         return proc(x: Vector[float]): float {.gcsafe.} = mode
     else:
         let m = y_vector.mean()

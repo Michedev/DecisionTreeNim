@@ -4,8 +4,9 @@ import ../task
 import ../impurity
 import ../rule/tree_rules
 import ../matrix_view
+import ../matrix_view_sorted
 
-proc new_leaf*(father: Node, X: MatrixView[float], y: VectorView[float]): Leaf =
+proc new_leaf*(father: Node, X: MatrixViewSorted[float], y: VectorView[float]): Leaf =
     result = new(Leaf)
     result.level = father.level + 1
     result.tree_task = father.tree_task
@@ -48,7 +49,7 @@ proc new_root*(task: Task, impurity: ImpurityF = nil, stop_rules: TreeStopRules 
     else:
         result.stop_rules = new_tree_stop_rules()
 
-proc new_root_leaf*(X: MatrixView[float], y: VectorView[float]): Leaf =
+proc new_root_leaf*(X: MatrixViewSorted[float], y: VectorView[float]): Leaf =
     result = new(Leaf)
     result.leaf_f = result.get_leaf_func(X, y)
     result.num_sons = 0

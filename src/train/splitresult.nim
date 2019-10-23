@@ -1,4 +1,5 @@
 import ../utils
+import sequtils
 
 type 
     SplitResult* {.shallow.} = ref object

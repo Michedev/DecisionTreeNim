@@ -4,7 +4,6 @@ import options
 import neo
 import matrix_view
 
-
 type
     ImpurityF* = proc(y: Vector[float]): float {.gcsafe.}
 
