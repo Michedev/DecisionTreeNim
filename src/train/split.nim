@@ -126,50 +126,62 @@ proc split_y_by_index(x_col: ColMatrixViewSorted[float], y: VectorView[float], i
     assert tot_count == x_col.len
     return (y1, y2, i1, i2, ct1, ct2)
 
+proc split_y_by_indexes*(x_col: ColMatrixViewSorted[float], y: VectorView[float], i_splits: seq[int]): seq[tuple[i1, i2: seq[int], ct1, ct2: CountTableRef[float]]] =
+    # echo"ylen ", y.len
+    # echo"xcol len: ", x_col.len
+    # echo"i_divide: ", i_divide
+    result = new_seq[tuple[i1, i2: seq[int], ct1, ct2: CountTableRef[float]]](0)
+    var valid_splits = new_seq[int](0)
+    for i in 0..<i_splits.len:
+        var
+            i1 = new_seq[int](i_splits[i]+1)
+            i2 = new_seq[int](x_col.len - i_splits[i]-1)
+            ct1 = newCountTable[float](64)
+            ct2 = newCountTable[float](64)
+        if i1.len == 0 or i2.len == 0:
+            continue
+        result.add (i1, i2, ct1, ct2)
+        valid_splits.add i_splits[i]
+    for i in 0..<x_col.len:
+        let i_sort = x_col.index_of(i)
+        let y_label = y.original[i_sort]
+        for j, i_split in valid_splits:
+            if i <= i_split:
+                result[j].i1[i] = i_sort
+                result[j].ct1.inc y_label
+            else:
+                let i2_i = i - i_split - 1
+                result[j].i2[i2_i] = i_sort
+                result[j].ct2.inc y_label
 
 proc best_split_col(impurity_f: ImpurityF, x_col: ColMatrixViewSorted[float], y: VectorView[float]): SplitResult {.gcsafe.} =
     assert x_col.len == y.len, "len of x is " &  x_col.len.intToStr & " while y is " & y.len.intToStr # & "\nindex of x: " & $x_col.index_sorted.row_index & "\nindex of y: " & $y.index
     # echo "x_col.row_index ", x_col.row_index
-    let splits = uniform_values(x_col, log2(x_col.len.float).round.int)
+    let indx_splits = uniform_values(x_col, log2(x_col.len.float).round.int)
+    if indx_splits.len == 0:
+        return new_split_result(-1, Inf)
     var min_impurity = Inf
     var best_split = 0.0
     var best_i1: seq[int]
     var best_i2: seq[int]
     var best_i_divide = -1
-    for i_split in splits:
-        if i_split == 0 or i_split >= (x_col.len-1):
-            continue
-        var (next_diff, i_diff) = x_col.prev_different(i_split)
-        # echo "prev different from ", x_col[i_split] , " is ", next_diff, " with index ", i_diff 
-        let true_i_split = i_diff
-        let (y1, y2, i1, i2, ct1, ct2) = split_y_by_index(x_col, y, true_i_split)
-        let split_value = (x_col[i_split] + next_diff) / 2.0
-        # echo "split index: ", true_i_split, " with value ", split_value
-        # echo "ct1: ", ct1
-        # echo "ct2: ", ct2
-        var
-            p1 = zeros(ct1.len)
-            p2 = zeros(ct2.len)
-            i = 0
-        for v in ct1.values:
-            p1[i] = v / y1.len
-            inc i
-        i = 0
-        for v in ct2.values:
-            p2[i] = v / y2.len
-            inc i
-        let impurity_y1 = impurity_f(p1)
-        let impurity_y2 = impurity_f(p2)
+    let splits = split_y_by_indexes(x_col, y, indx_splits)
+    for i, (i1, i2, ct1, ct2) in splits:
+        let i_split = indx_splits[i]
+        let split_value = x_col[i_split]
+        let impurity_y1 = impurity_f(ct1)
+        let impurity_y2 = impurity_f(ct2)
         let tot_impurity: float = impurity_y1 + impurity_y2
         # echo "impurity split: ", tot_impurity
+        
         if min_impurity > tot_impurity:
             min_impurity = tot_impurity
             best_split = split_value
             best_i1 := i1
             best_i2 := i2
-            best_i_divide = true_i_split
+            best_i_divide = i_split
         # echo"x_col.index_sorted.row_index: ", x_col.index_sorted.row_index
-    return new_split_result(best_split, min_impurity, -1, best_i1, best_i2)
+    return new_split_result(best_split, min_impurity, x_col.col_index, best_i1, best_i2)
 
 proc random_features(num_features: int, max_features: float): seq[int] =
     var sampled_features = (max_features * num_features.float).ceil.int
@@ -181,12 +193,13 @@ proc best_split*(impurity_f: ImpurityF, X: MatrixViewSorted[float], y: VectorVie
     # echo "X.row_index ", X.row_index
     var 
         best_split: SplitResult = new_split_result(-1, Inf)
+    if y.len == 0:
+        return best_split
     for j in random_features(X.N, max_features):
         # echo "split on column ", j
         let j_split: SplitResult = best_split_col(impurity_f, X.column_sorted(j), y)
         if best_split.impurity > j_split.impurity:
             best_split = j_split
-            best_split.col = j
     # echo "best split on column ", $best_split.col, " with value ", $best_split.split_value & " and impurity " & $best_split.impurity
     # echo "best split len split 1: " & $best_split.i1.len & " best split len split 2: " & $best_split.i2.len
     # echo "i1: ", best_split.i1

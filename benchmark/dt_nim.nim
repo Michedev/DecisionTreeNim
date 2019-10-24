@@ -6,8 +6,8 @@ import math
 import neo
 
 proc main(): void =
-    let X_iris = read_X_data("tests/data/X_iris.csv")
-    let y_iris = read_y_data("tests/data/y_iris.csv")
+    # let X_iris = read_X_data("tests/data/X_iris.csv")
+    # let y_iris = read_y_data("tests/data/y_iris.csv")
     # var rf = new_random_forest_classifier(10, num_threads=1)
     # var start = now()
     # rf.fit(X_iris, y_iris)
@@ -18,6 +18,8 @@ proc main(): void =
     let y_train_adult = read_y_data_neo("tests/data/y_train_adult.csv")
     let X_test_adult = read_X_data_neo("tests/data/X_test_adult.csv")
     let y_test_adult = read_y_data_neo("tests/data/y_test_adult.csv")
+    echo "X_train adult first row ", X_train_adult.row(0)
+    echo "X_test adult first row ", X_test_adult.row(0)
     var start = now()
     # rf.fit(X_iris, y_iris)
     rf.fit(X_train_adult, y_train_adult)
