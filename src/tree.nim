@@ -63,14 +63,8 @@ proc new_regression_tree* (max_depth: int = -1, min_samples_split: int = -1, max
 
 ## Train function of decision tree
 proc fit* (t: DecisionTree, X: seq[seq[float]], y: seq[float]) {.gcsafe.} =
-    var X_train = X
-    var y_train = y
-    if t.bagging < 1.0:
-        (X_train, y_train) = bagging(X_train, y_train, t.bagging)
-    try:
-        fit(t.root, X_train, y_train)
-    except RootIsLeaf:
-        t.root = new_root_leaf(X_train,y_train)
+    let (X_train, y_train) = bagging(X, y, t.bagging)
+    fit(t.root, X_train, y_train)
 
 proc print_root_split*(t: DecisionTree) =
     if t.root of Leaf:

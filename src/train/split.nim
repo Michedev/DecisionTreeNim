@@ -5,6 +5,7 @@ import math
 import ../utils
 import random
 import splitresult
+import ../view
 
 type ImpurityF = proc(y: seq[float]): float
 
@@ -29,25 +30,51 @@ proc next_different(data: seq[float], i: int): float {.inline.} =
     return data[i] * 0.9
 
 
-#TODO: try to submit into stats package
-# use percentiles as split values
-proc percentiles(data: seq[float]): seq[float] =
-    let sorted_data = data.sorted(cmp)
-    if sorted_data.len() <= 10:
-        result = @[]
-        for i, v in sorted_data:
-            if i < sorted_data.len() - 1:
-                result.add v
-                result.add (v + sorted_data[i+1]) / 2
-        return result 
-    result = new_seq[float]()
-    for perc in 1..9:
-        let i = (perc / 10 * sorted_data.len().float).round.int
-        let with_next = (sorted_data[i] + sorted_data.next_different(i)) / 2
-        result.add with_next
-    result = result[1..(result.len-2)]
+proc uniform(data: ColumnMatrixView[float], n: int): seq[float] =
+    result = newSeq[float](n-1)
+    var
+        min_value = Inf
+        max_value = - Inf
+    for v in data:
+        if v < min_value:
+            min_value = v
+        if v > max_value:
+            max_value = v
+    for i in 1..(n-1):
+        result[i-1] = min_value + (max_value - min_value).float * i.float / n.float
 
-proc split_y_by_value(x_col, y: seq[float], split_value: float): tuple[y1, y2: seq[float], i1, i2: seq[int]] =
+# #TODO: try to submit into stats package
+# # use percentiles as split values
+# proc percentiles(data: ColumnMatrixView[float]): seq[tuple[i: int, v: float]] =
+#     let sorted_data = data.to_seq().sorted(cmp)
+#     if sorted_data.len() <= 10:
+#         result = @[]
+#         for i, v in sorted_data:
+#             if i < sorted_data.len() - 1:
+#                 result.add v
+#                 result.add (v + sorted_data[i+1]) / 2
+#         return result 
+#     result = new_seq[float]()
+#     for perc in 1..9:
+#         let i = (perc / 10 * sorted_data.len().float).round.int
+#         let with_next = (sorted_data[i] + sorted_data.next_different(i)) / 2
+#         result.add (i, with_next)let sorted_data = data.to_seq().sorted(cmp)
+#         if sorted_data.len() <= 10:
+#             result = @[]
+#             for i, v in sorted_data:
+#                 if i < sorted_data.len() - 1:
+#                     result.add v
+#                     result.add (v + sorted_data[i+1]) / 2
+#             return result 
+#         result = new_seq[float]()
+#         for perc in 1..9:
+#             let i = (perc / 10 * sorted_data.len().float).round.int
+#             let with_next = (sorted_data[i] + sorted_data.next_different(i)) / 2
+#             result.add (i, with_next)
+#         result = result[1..(result.len-2)]
+#     result = result[1..(result.len-2)]
+
+proc split_y_by_value(x_col: ColumnMatrixView[float], y: VectorView[float], split_value: float): tuple[y1, y2: seq[float], i1, i2: seq[int]] =
     var 
         y1 = new_seq[float](0)
         y2 = new_seq[float](0)
@@ -55,17 +82,17 @@ proc split_y_by_value(x_col, y: seq[float], split_value: float): tuple[y1, y2: s
         i2 = new_seq[int](0)
     for i, v in x_col:
         if v < split_value:
-            y1.add y[i]
+            y1.add y.get_raw(i)
             i1.add i
         else:
-            y2.add y[i]
+            y2.add y.get_raw(i)
             i2.add i
     return (y1, y2, i1, i2)
 
 
-proc best_split_col(impurity_f: ImpurityF, x_col: seq[float], y: seq[float]): SplitResult {.gcsafe.} =
+proc best_split_col(impurity_f: ImpurityF, x_col: ColumnMatrixView[float], y: VectorView[float]): SplitResult {.gcsafe.} =
     assert x_col.len == y.len
-    let splits = percentiles(x_col)
+    let splits = uniform(x_col, 10)
     # echo"splits: ", splits
     var min_impurity = Inf
     var best_split = 0.0
@@ -89,10 +116,10 @@ proc random_features(num_features: int, max_features: float): seq[int] =
         if rand(1.0) < max_features:
             result.add i
 
-proc best_split*(impurity_f: ImpurityF, X: seq[seq[float]], y: seq[float], max_features: float = 1.0): SplitResult {.gcsafe.} =
+proc best_split*(impurity_f: ImpurityF, X: MatrixView[float], y: VectorView[float], max_features: float = 1.0): SplitResult {.gcsafe.} =
     var 
         best_split: SplitResult = new_split_result(-1, Inf)
-    for j in random_features(X[0].len, max_features):
+    for j in random_features(X.ncols, max_features):
         let j_split = best_split_col(impurity_f, X.column(j), y)
         if best_split.impurity > j_split.impurity:
             best_split = j_split
