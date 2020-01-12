@@ -12,16 +12,17 @@ proc new_leaf*(father: Node, X: MatrixView[float32], y: VectorView[float32]): Le
     result.tree_task = father.tree_task
     father.num_sons += 1
     result.max_features = father.max_features
-    result.impurity = father.impurity
+    result.impurity_f = father.impurity_f
     result.stop_rules = father.stop_rules
     result.leaf_f = result.get_leaf_func(X, y)
+    result.leaf_proba = result.get_leaf_proba_func(X, y)
     result.num_sons = 0
     result.father = father
 
 proc new_son*(father: Node): Node =
     result = new(Node)
     result.level = father.level + 1
-    result.impurity = father.impurity
+    result.impurity_f = father.impurity_f
     result.max_features = father.max_features
     result.tree_task = father.tree_task
     result.stop_rules = father.stop_rules
@@ -30,19 +31,20 @@ proc new_son*(father: Node): Node =
     father.num_sons += 1
 
 
-proc new_root*(task: Task, impurity: proc(y: sink seq[float32]): float32 {.gcsafe.} = nil, stop_rules: TreeStopRules = nil, max_features: float32 = 1.0): Node =
+proc new_root*(task: Task, impurity_f: Impurity = Default, stop_rules: TreeStopRules = nil, max_features: float32 = 1.0): Node =
     result = new(Node)
     result.level = 0
     result.max_features = max_features
     result.num_sons = 0
     result.tree_task = task
-    if impurity.is_nil():
+    result.impurity_value = Inf
+    if impurity_f == Default:
         if task == Classification:
-            result.impurity = gini
+            result.impurity_f = Gini
         else:
-            result.impurity = mse_from_mean
+            result.impurity_f = Mse
     else:
-        result.impurity = impurity
+        result.impurity_f = impurity_f
     if not stop_rules.is_nil():
         result.stop_rules = stop_rules
     else:
