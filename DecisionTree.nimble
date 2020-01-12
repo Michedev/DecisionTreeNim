@@ -11,3 +11,4 @@ srcDir        = "src"
 # Dependencies
 
 requires "nim >= 1.0.0"
+requires "sequtils2 >= 1.1.0"
