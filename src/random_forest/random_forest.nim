@@ -41,17 +41,17 @@ proc new_random_forest_regressor*(n_trees: int = 100, max_depth: int = -1, min_s
                                   bagging: float = 1.0, num_threads: int = 1): RandomForest =
     new_random_forest(Regression, n_trees=n_trees, num_threads=num_threads, h=(max_depth, min_samples_split, max_features, min_impurity_decrease, bagging))
 
-include parallel_rf
+# include parallel_rf
                 
 proc fit* (rf: RandomForest, X: seq[seq[float]], y: seq[float]) =
     rf.num_classes = y.uniques(preserve_order=false).len
     for i in 0..<rf.num_trees:
         rf.trees[i] = new_tree(rf.task, rf.hyperparams)
-    if rf.num_threads > 1:
-        rf.fit_parallel(X,y)
-    else:
-        for tree in rf.trees:
-            tree.fit(X, y)
+    # if rf.num_threads > 1:
+    #     rf.fit_parallel(X,y)
+    # else:
+    for tree in rf.trees:
+        tree.fit(X, y)
     
                 
     

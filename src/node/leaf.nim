@@ -5,7 +5,7 @@ import tables
 import ../view
 
 
-proc get_leaf_func*(n: Node, X: MatrixView[float], y: VectorView[float]) : proc(x: seq[float]): float {.gcsafe.} =
+proc get_leaf_func*(n: Node, X: MatrixView[float], y: VectorView[float]) : proc(x: sink seq[float]): float {.gcsafe.} =
     if n.tree_task == Classification:
         var ctable = toCountTable y.to_seq()
         let mode: float = ctable.largest.key

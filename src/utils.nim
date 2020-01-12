@@ -2,12 +2,7 @@ import sequtils
 import math
 import random
 
-proc column*(X: seq[seq[float]], j: int): seq[float] =
-    result = new_seq[float](X.len)
-    for i, row in X:
-        result[i] = row[j]
-
-proc sample_wo_reins*(start, finish: int, perc: float) : seq[int] =
+proc sample_wo_reins*(start, finish: int, perc: float): seq[int] =
     assert 0.0 <= perc and perc <= 1.0
     if perc == 1.0:
         return (start..finish).to_seq

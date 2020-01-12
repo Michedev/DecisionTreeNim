@@ -11,8 +11,9 @@ type
                 level*: Natural
                 max_features*: float
                 tree_task*: Task
-                impurity*: proc(y: seq[float]): float {.gcsafe.}
+                impurity*: proc(y: sink seq[float]): float {.gcsafe.}
                 stop_rules*: TreeStopRules
+                impurity_value*: float
         Leaf* = ref object of Node
                 leaf_f*: proc(x: seq[float]): float {.gcsafe.}
                 leaf_proba*: proc(x: seq[float]): seq[float] {.gcsafe.}

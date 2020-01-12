@@ -30,11 +30,11 @@ proc add_pre_split_rule* (tr: TreeStopRules, rule: Rule) =
 proc add_post_split_rule* (tr: TreeStopRules, rule: PostSplitRule) =
     tr.post_split_rules.add rule
 
-proc add_creation_rules* (tr: TreeStopRules, rules: seq[Rule]) =
+proc add_creation_rules* (tr: TreeStopRules, rules: sink seq[Rule]) =
     for rule in rules:
         tr.add_creation_rule rule
 
-proc add_pre_split_rules* (tr: TreeStopRules, rules: seq[Rule]) =
+proc add_pre_split_rules* (tr: TreeStopRules, rules: sink seq[Rule]) =
     for rule in rules:
         tr.add_pre_split_rule rule
 
@@ -42,15 +42,17 @@ proc add_post_split_rules* (tr: TreeStopRules, rules: seq[PostSplitRule]) =
     for rule in rules:
         tr.add_post_split_rule rule
 
-proc any_true(rules: seq[Rule], n: INode, X: MatrixView[float], y: VectorView[float]): bool {.gcsafe.} =
+proc any_true(rules: sink seq[Rule], n: INode, X: MatrixView[float], y: VectorView[float]): bool {.gcsafe.} =
     for rule in rules:
         if rule(n, X, y):
+            # echo "stop for rule ", rule
             return true
     return false
 
 proc any_true(rules: seq[PostSplitRule], n: INode, X: MatrixView[float], y: VectorView[float], X1: MatrixView[float], y1: VectorView[float], X2: MatrixView[float], y2: VectorView[float]): bool {.gcsafe.} =
     for rule in rules:
         if rule(n, X, y, X1, y1, X2, y2):
+            # echo "stop for rule ", rule
             return true
     return false
 

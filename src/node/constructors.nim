@@ -30,7 +30,7 @@ proc new_son*(father: Node): Node =
     father.num_sons += 1
 
 
-proc new_root*(task: Task, impurity: proc(y: seq[float]): float {.gcsafe.} = nil, stop_rules: TreeStopRules = nil, max_features: float = 1.0): Node =
+proc new_root*(task: Task, impurity: proc(y: sink seq[float]): float {.gcsafe.} = nil, stop_rules: TreeStopRules = nil, max_features: float = 1.0): Node =
     result = new(Node)
     result.level = 0
     result.max_features = max_features

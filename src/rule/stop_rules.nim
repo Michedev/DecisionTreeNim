@@ -20,8 +20,9 @@ proc unique_class_rule*(): Rule =
 proc min_impurity_decrease_rule*(threshold: float): PostSplitRule =
     (
         proc(n: INode, X: MatrixView[float], y: VectorView[float], X1: MatrixView[float], y1: VectorView[float], X2: MatrixView[float], y2: VectorView[float]): bool {.gcsafe.} =
-            let decrease = n.impurity_f(y.to_seq) - (n.impurity_f(y1.to_seq) + n.impurity_f(y2.to_seq)) 
-            # echo"decrease is ", decrease 
-            return decrease < threshold
+            # let decrease = n.impurity_f(y.to_seq) - (n.impurity_f(y1.to_seq) + n.impurity_f(y2.to_seq)) 
+            # # echo"decrease is ", decrease 
+            # return decrease < threshold
+            return false
         
     )

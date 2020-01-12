@@ -62,7 +62,7 @@ proc new_regression_tree* (max_depth: int = -1, min_samples_split: int = -1, max
 
 
 ## Train function of decision tree
-proc fit* (t: DecisionTree, X: seq[seq[float]], y: seq[float]) {.gcsafe.} =
+proc fit* (t: DecisionTree, X: sink seq[seq[float]], y: sink seq[float]) {.gcsafe.} =
     let (X_train, y_train) = bagging(X, y, t.bagging)
     fit(t.root, X_train, y_train)
 
@@ -72,14 +72,14 @@ proc print_root_split*(t: DecisionTree) =
     else:
         echo "Root node, split in column ", t.root.split_column, " with value ", t.root.split_value
             
-proc predict*(tree: DecisionTree, x: seq[float]): float {.gcsafe.} =
+proc predict*(tree: DecisionTree, x: sink seq[float]): float {.gcsafe.} =
     tree.root.get_value(x)
 
-proc predict*(tree: DecisionTree, X: seq[seq[float]]): seq[float] {.gcsafe.} =
+proc predict*(tree: DecisionTree, X: sink seq[seq[float]]): seq[float] {.gcsafe.} =
     X.map_it(tree.predict(it))
 
 proc predict_proba*(tree: DecisionTree, x: seq[float]): seq[float] {.gcsafe.} =
     tree.root.get_proba(x)
 
 proc predict_proba*(tree: DecisionTree, X: seq[seq[float]]): seq[seq[float]] {.gcsafe.} =
-    X.map_it(tree.predict_proba(it))
+    return X.map_it(tree.predict_proba(it))
