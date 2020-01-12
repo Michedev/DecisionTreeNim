@@ -42,17 +42,17 @@ proc new_random_forest_regressor*(n_trees: int = 100, max_depth: int = -1, min_s
                                   bagging: float32 = 0.7, num_threads: int = 1): RandomForest =
     new_random_forest(Regression, n_trees=n_trees, num_threads=num_threads, h=(max_depth, min_samples_split, max_features, min_impurity_decrease, bagging))
 
-# include parallel_rf
+include parallel_rf
                 
 proc fit* (rf: RandomForest, X: seq[seq[float32]], y: seq[float32]) =
     rf.num_classes = y.uniques(preserve_order=false).len
     for i in 0..<rf.num_trees:
         rf.trees[i] = new_tree(rf.task, rf.hyperparams)
-    # if rf.num_threads > 1:
-    #     rf.fit_parallel(X,y)
-    # else:
-    for tree in rf.trees:
-        tree.fit(X, y)
+    if rf.num_threads > 1:
+        rf.fit_parallel(X,y)
+    else:
+        for tree in rf.trees:
+            tree.fit(X, y)
     
                 
     
@@ -65,7 +65,9 @@ proc predict*(rf: RandomForest, x: seq[float32]): float32 {.gcsafe.} =
             return predictions.mean()
 
 proc predict*(rf: RandomForest, X: seq[seq[float32]]): seq[float32] {.gcsafe.} =
-    X.map_it(rf.predict(it))
+    result = new_seq[float32](X.len)
+    for i, row in X:
+        result[i] = rf.predict(row)
     
 proc predict_proba*(forest: RandomForest, x: seq[float32]): seq[float32] {.gcsafe.} =
     result = new_seq[float32](forest.num_classes)
@@ -77,4 +79,6 @@ proc predict_proba*(forest: RandomForest, x: seq[float32]): seq[float32] {.gcsaf
         result[i_class] /= forest.num_trees.float32
 
 proc predict_proba*(forest: RandomForest, X: seq[seq[float32]]): seq[seq[float32]]  =
-    X.mapIt(forest.predict_proba(it))
+    result = newSeq[seq[float32]](X.len)
+    for i, row in X:
+        result[i] = forest.predict_proba(row)
