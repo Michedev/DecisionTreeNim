@@ -3,14 +3,14 @@ import unittest
 import math
 
 
-proc equals(a,b,delta: float = 10e-4): bool =
+proc equals(a,b,delta: float32 = 10e-4): bool =
     return abs(a - b) < delta
 
 suite "Test impurity functions":
     setup:
         let no_uncertainity = @[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         let max_uncertainity = @[0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
-        let random_seq: seq[float] = @[1.0, 9.0, 1.0, 9.0, 8.0, 0.0, 7.0, 8.0, 1.0, 9.0, 4.0, 6.0, 7.0, 3.0, 0.0, 9.0, 6.0, 9.0, 5.0, 3.0]
+        let random_seq: seq[float32] = @[1.0, 9.0, 1.0, 9.0, 8.0, 0.0, 7.0, 8.0, 1.0, 9.0, 4.0, 6.0, 7.0, 3.0, 0.0, 9.0, 6.0, 9.0, 5.0, 3.0]
     test "Test gini_index":
         let gini_no_unc = gini(no_uncertainity)
         require gini_no_unc.equals(0.0)

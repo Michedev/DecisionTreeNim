@@ -1,4 +1,4 @@
-type Hyperparams* = tuple[max_depth: int, min_samples_split: int, max_features: float, min_impurity_decrease: float, bagging: float]
+type Hyperparams* = tuple[max_depth: int, min_samples_split: int, max_features: float32, min_impurity_decrease: float32, bagging: float32]
 
 template hyperparams_binding*(T: typed) =
     proc bagging*(t: T): auto {.inline.} = t.hyperparams.bagging

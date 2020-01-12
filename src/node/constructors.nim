@@ -6,7 +6,7 @@ import ../rule/tree_rules
 import ../view
 
 
-proc new_leaf*(father: Node, X: MatrixView[float], y: VectorView[float]): Leaf =
+proc new_leaf*(father: Node, X: MatrixView[float32], y: VectorView[float32]): Leaf =
     result = new(Leaf)
     result.level = father.level + 1
     result.tree_task = father.tree_task
@@ -30,7 +30,7 @@ proc new_son*(father: Node): Node =
     father.num_sons += 1
 
 
-proc new_root*(task: Task, impurity: proc(y: sink seq[float]): float {.gcsafe.} = nil, stop_rules: TreeStopRules = nil, max_features: float = 1.0): Node =
+proc new_root*(task: Task, impurity: proc(y: sink seq[float32]): float32 {.gcsafe.} = nil, stop_rules: TreeStopRules = nil, max_features: float32 = 1.0): Node =
     result = new(Node)
     result.level = 0
     result.max_features = max_features
@@ -48,7 +48,7 @@ proc new_root*(task: Task, impurity: proc(y: sink seq[float]): float {.gcsafe.} 
     else:
         result.stop_rules = new_tree_stop_rules()
 
-proc new_root_leaf*(X: MatrixView[float], y: VectorView[float]): Leaf =
+proc new_root_leaf*(X: MatrixView[float32], y: VectorView[float32]): Leaf =
     result = new(Leaf)
     result.leaf_f = result.get_leaf_func(X, y)
     result.num_sons = 0

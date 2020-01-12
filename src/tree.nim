@@ -15,16 +15,16 @@ type
 proc assert_int_hp(value: int, msg: string = "") =
     assert value == -1 or value > 0, msg
 
-proc assert_0_1_float_hp(value: float, msg: string = "") = 
+proc assert_0_1_float32_hp(value: float32, msg: string = "") = 
     assert value <= 1.0 or value >= 0.0 or value == -1.0, msg
 
-proc assert_positive_float_hp(value: float, msg: string = "") =
+proc assert_positive_float32_hp(value: float32, msg: string = "") =
     assert value == -1.0 or value > 0.0, msg
 
 hyperparams_binding(DecisionTree)
 
 
-proc add_rules(tree: DecisionTree, max_depth: int, min_samples_split: int, max_features: float, min_impurity_decrease: float) =
+proc add_rules(tree: DecisionTree, max_depth: int, min_samples_split: int, max_features: float32, min_impurity_decrease: float32) =
     if max_depth != -1:
         tree.stop_rules.add_creation_rule max_depth_rule(max_depth)
     if min_samples_split != -1:
@@ -41,9 +41,9 @@ proc new_tree*(task: Task, h: Hyperparams,
     result = new(DecisionTree)
     assert_int_hp(h.max_depth)
     assert_int_hp(h.min_samples_split)
-    assert_0_1_float_hp(h.max_features)
-    assert_positive_float_hp(h.min_impurity_decrease)
-    assert_0_1_float_hp(h.bagging)
+    assert_0_1_float32_hp(h.max_features)
+    assert_positive_float32_hp(h.min_impurity_decrease)
+    assert_0_1_float32_hp(h.bagging)
     result.stop_rules = new_tree_stop_rules()
     
     result.add_rules(h.max_depth, h.min_samples_split, h.max_features, h.min_impurity_decrease)
@@ -51,18 +51,18 @@ proc new_tree*(task: Task, h: Hyperparams,
     result.hyperparams = h
 
 
-proc new_classification_tree* (max_depth: int = -1, min_samples_split: int = -1, max_features: float = 1.0, min_impurity_decrease: float = 1e-6,
-                               bagging: float = 1.0): DecisionTree = 
+proc new_classification_tree* (max_depth: int = -1, min_samples_split: int = -1, max_features: float32 = 1.0, min_impurity_decrease: float32 = 1e-6,
+                               bagging: float32 = 1.0): DecisionTree = 
     new_tree(task=Classification, (max_depth, min_samples_split, max_features, min_impurity_decrease, bagging)) 
 
-proc new_regression_tree* (max_depth: int = -1, min_samples_split: int = -1, max_features: float = 1.0, min_impurity_decrease: float = 1e-6,
-                           bagging: float = 1.0): DecisionTree = 
+proc new_regression_tree* (max_depth: int = -1, min_samples_split: int = -1, max_features: float32 = 1.0, min_impurity_decrease: float32 = 1e-6,
+                           bagging: float32 = 1.0): DecisionTree = 
     new_tree(task=Regression, (max_depth, min_samples_split, max_features, min_impurity_decrease, bagging)) 
 
 
 
 ## Train function of decision tree
-proc fit* (t: DecisionTree, X: sink seq[seq[float]], y: sink seq[float]) {.gcsafe.} =
+proc fit* (t: DecisionTree, X: sink seq[seq[float32]], y: sink seq[float32]) {.gcsafe.} =
     let (X_train, y_train) = bagging(X, y, t.bagging)
     fit(t.root, X_train, y_train)
 
@@ -72,14 +72,14 @@ proc print_root_split*(t: DecisionTree) =
     else:
         echo "Root node, split in column ", t.root.split_column, " with value ", t.root.split_value
             
-proc predict*(tree: DecisionTree, x: sink seq[float]): float {.gcsafe.} =
+proc predict*(tree: DecisionTree, x: sink seq[float32]): float32 {.gcsafe.} =
     tree.root.get_value(x)
 
-proc predict*(tree: DecisionTree, X: sink seq[seq[float]]): seq[float] {.gcsafe.} =
+proc predict*(tree: DecisionTree, X: sink seq[seq[float32]]): seq[float32] {.gcsafe.} =
     X.map_it(tree.predict(it))
 
-proc predict_proba*(tree: DecisionTree, x: seq[float]): seq[float] {.gcsafe.} =
+proc predict_proba*(tree: DecisionTree, x: seq[float32]): seq[float32] {.gcsafe.} =
     tree.root.get_proba(x)
 
-proc predict_proba*(tree: DecisionTree, X: seq[seq[float]]): seq[seq[float]] {.gcsafe.} =
+proc predict_proba*(tree: DecisionTree, X: seq[seq[float32]]): seq[seq[float32]] {.gcsafe.} =
     return X.map_it(tree.predict_proba(it))

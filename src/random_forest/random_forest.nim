@@ -32,18 +32,18 @@ hyperparams_binding(RandomForest)
 
 
 proc new_random_forest_classifier*(n_trees: int = 100, max_depth: int = -1, min_samples_split: int = -1,
-                                   max_features: float = 1.0, min_impurity_decrease: float = 1e-6,
-                                   bagging: float = 1.0, num_threads: int = 1,): RandomForest =
+                                   max_features: float32 = 1.0, min_impurity_decrease: float32 = 1e-6,
+                                   bagging: float32 = 1.0, num_threads: int = 1,): RandomForest =
     new_random_forest(Classification, n_trees=n_trees, num_threads=num_threads, h=(max_depth, min_samples_split, max_features, min_impurity_decrease, bagging))
 
 proc new_random_forest_regressor*(n_trees: int = 100, max_depth: int = -1, min_samples_split: int = -1,
-                                  max_features: float = 1.0, min_impurity_decrease: float = 1e-6,
-                                  bagging: float = 1.0, num_threads: int = 1): RandomForest =
+                                  max_features: float32 = 1.0, min_impurity_decrease: float32 = 1e-6,
+                                  bagging: float32 = 1.0, num_threads: int = 1): RandomForest =
     new_random_forest(Regression, n_trees=n_trees, num_threads=num_threads, h=(max_depth, min_samples_split, max_features, min_impurity_decrease, bagging))
 
 # include parallel_rf
                 
-proc fit* (rf: RandomForest, X: seq[seq[float]], y: seq[float]) =
+proc fit* (rf: RandomForest, X: seq[seq[float32]], y: seq[float32]) =
     rf.num_classes = y.uniques(preserve_order=false).len
     for i in 0..<rf.num_trees:
         rf.trees[i] = new_tree(rf.task, rf.hyperparams)
@@ -55,7 +55,7 @@ proc fit* (rf: RandomForest, X: seq[seq[float]], y: seq[float]) =
     
                 
     
-proc predict*(rf: RandomForest, x: seq[float]): float {.gcsafe.} =
+proc predict*(rf: RandomForest, x: seq[float32]): float32 {.gcsafe.} =
     let predictions = rf.trees.map_it(it.predict(x))
     case rf.task:
         of Classification:
@@ -63,17 +63,17 @@ proc predict*(rf: RandomForest, x: seq[float]): float {.gcsafe.} =
         of Regression:
             return predictions.mean()
 
-proc predict*(rf: RandomForest, X: seq[seq[float]]): seq[float] {.gcsafe.} =
+proc predict*(rf: RandomForest, X: seq[seq[float32]]): seq[float32] {.gcsafe.} =
     X.map_it(rf.predict(it))
     
-proc predict_proba*(forest: RandomForest, x: seq[float]): seq[float] {.gcsafe.} =
-    result = new_seq[float](forest.num_classes)
+proc predict_proba*(forest: RandomForest, x: seq[float32]): seq[float32] {.gcsafe.} =
+    result = new_seq[float32](forest.num_classes)
     for t in forest.trees:
         let p_y = t.predict_proba(x)
         for i_class in 0..<forest.num_classes:
             result[i_class] += p_y[i_class]
     for i_class in 0..<forest.num_classes:
-        result[i_class] /= forest.num_trees.float
+        result[i_class] /= forest.num_trees.float32
 
-proc predict_proba*(forest: RandomForest, X: seq[seq[float]]): seq[seq[float]]  =
+proc predict_proba*(forest: RandomForest, X: seq[seq[float32]]): seq[seq[float32]]  =
     X.mapIt(forest.predict_proba(it))

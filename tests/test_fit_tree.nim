@@ -56,7 +56,7 @@ suite "Test fit classification tree":
         let accuracy_iris = accuracy(y_iris, yhat)
         require(accuracy_iris > 0.95)
         echo "accuracy on iris train set is ", accuracy_iris
-        echo "seconds fit: ", time_fit.inMilliseconds.float / 1000, " seconds predict: ", time_predict.inMilliseconds.float / 1000
+        echo "seconds fit: ", time_fit.inMilliseconds.float32 / 1000, " seconds predict: ", time_predict.inMilliseconds.float32 / 1000
     test "Random forest with parallel training should overfit when predict on Iris train set":
         let X_iris = read_X_data("tests/data/X_iris.csv")
         let y_iris = read_y_data("tests/data/y_iris.csv")
@@ -64,14 +64,14 @@ suite "Test fit classification tree":
         var start = now()
         rf.fit(X_iris, y_iris)
         let time_fit = now() - start
-        echo "seconds fit: ", time_fit.inMilliseconds.float / 1000
+        echo "seconds fit: ", time_fit.inMilliseconds.float32 / 1000
         start = now()
         let yhat = rf.predict(X_iris)
         let time_predict = now() - start
         let accuracy_iris = accuracy(y_iris, yhat)
         require(accuracy_iris > 0.95)
         echo "accuracy on iris train set is ", accuracy_iris
-        echo " seconds predict: ", time_predict.inMilliseconds.float / 1000
+        echo " seconds predict: ", time_predict.inMilliseconds.float32 / 1000
     test "Random forest should overfit when predict on Iris train set x 10":
         let X_iris = read_X_data("tests/data/X_iris.csv", times=10)
         let y_iris = read_y_data("tests/data/y_iris.csv", times=10)
@@ -85,7 +85,7 @@ suite "Test fit classification tree":
         let accuracy_iris = accuracy(y_iris, yhat)
         require(accuracy_iris > 0.95)
         echo "accuracy on iris train set is ", accuracy_iris
-        echo "seconds fit: ", time_fit.inMilliseconds.float / 1000, " seconds predict: ", time_predict.inMilliseconds.float / 1000
+        echo "seconds fit: ", time_fit.inMilliseconds.float32 / 1000, " seconds predict: ", time_predict.inMilliseconds.float32 / 1000
     test "Random forest with parallel training should overfit when predict on Iris train set x 10":
         let X_iris = read_X_data("tests/data/X_iris.csv", times=10)
         let y_iris = read_y_data("tests/data/y_iris.csv", times=10)
@@ -99,5 +99,5 @@ suite "Test fit classification tree":
         let accuracy_iris = accuracy(y_iris, yhat)
         require(accuracy_iris > 0.95)
         echo "accuracy on iris train set is ", accuracy_iris
-        echo "seconds fit: ", time_fit.inMilliseconds.float / 1000, " seconds predict: ", time_predict.inMilliseconds.float / 1000
+        echo "seconds fit: ", time_fit.inMilliseconds.float32 / 1000, " seconds predict: ", time_predict.inMilliseconds.float32 / 1000
     

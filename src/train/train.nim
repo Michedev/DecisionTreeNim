@@ -3,10 +3,10 @@ import sons_gen
 import options
 import ../view
 
-type NodeWithData = tuple[n: Node, X: MatrixView[float], y: VectorView[float]]
+type NodeWithData = tuple[n: Node, X: MatrixView[float32], y: VectorView[float32]]
 
 ## Train function of decision tree
-proc fit* (root: Node, X: MatrixView[float], y: VectorView[float]) {.gcsafe.} =
+proc fit* (root: Node, X: MatrixView[float32], y: VectorView[float32]) {.gcsafe.} =
     assert X.len == y.len
     var border = new_seq[NodeWithData](1)
     border[0] = (root, X, y)

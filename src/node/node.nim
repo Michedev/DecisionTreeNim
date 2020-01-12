@@ -6,17 +6,17 @@ type
                 sons*: array[2, Node]
                 num_sons* : int
                 father*: Node
-                split_value*: float
+                split_value*: float32
                 split_column*: int
                 level*: Natural
-                max_features*: float
+                max_features*: float32
                 tree_task*: Task
-                impurity*: proc(y: sink seq[float]): float {.gcsafe.}
+                impurity*: proc(y: sink seq[float32]): float32 {.gcsafe.}
                 stop_rules*: TreeStopRules
-                impurity_value*: float
+                impurity_value*: float32
         Leaf* = ref object of Node
-                leaf_f*: proc(x: seq[float]): float {.gcsafe.}
-                leaf_proba*: proc(x: seq[float]): seq[float] {.gcsafe.}
+                leaf_f*: proc(x: seq[float32]): float32 {.gcsafe.}
+                leaf_proba*: proc(x: seq[float32]): seq[float32] {.gcsafe.}
         RootIsLeaf* = object of Exception
 
 proc is_leaf*(n: Node): bool = n is Leaf
