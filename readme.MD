@@ -7,8 +7,8 @@ Nim package for decision trees and random forest
 - Inspired by Scikit-learn api
 - Random forest can train and predict in parallel
 - Actually you feed the X matrix of size [n x m] as `seq[seq[float]]` RowMajor and the y array of size [n] as `seq[float]`
-- TODO: explain with a picture the custom stop rules 
 
+#### Decision Tree
 
 ```
 import decision_tree
@@ -19,12 +19,13 @@ let yhat = dt.predict(X_test)
 
 ```
 
-### Random forest
+#### Random forest
 
 ```
 import decision_tree
 
-let rf = new_random_forest_classifier(n_trees=100, num_threads=4)
+let rf = new_random_forest_classifier(n_trees=100, num_threads=4) #parallel training too!
 rf.fit(X_train, y_train)
 let yhat = rf.predict(X_test)
 ```
+
