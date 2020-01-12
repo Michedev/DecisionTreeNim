@@ -11,5 +11,5 @@ proc iris_bench() =
     rf.fit(X_data, y_data)
     echo "Successfull finished training of a Random Forest of 100 trees"
     
-
-iris_bench()
+if isMainModule:
+    iris_bench()
