@@ -1,7 +1,7 @@
 # Package
 
 version       = "0.1.0"
-author        = "Mikedev"
+author        = "Michele De Vita"
 description   = "Decision tree and Random forest CART implementation for nim"
 license       = "GPL-3.0"
 srcDir        = "src"
