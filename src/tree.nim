@@ -66,7 +66,7 @@ proc fit* (t: DecisionTree, X: sink seq[seq[float32]], y: sink seq[float32]) {.g
     let (X_train, y_train) = bagging(X, y, t.bagging)
     fit(t.root, X_train, y_train)
 
-proc print_root_split*(t: DecisionTree) =
+proc print_root_split(t: DecisionTree) =
     if t.root of Leaf:
         echo "Root is a leaf"
     else:
@@ -76,10 +76,14 @@ proc predict*(tree: DecisionTree, x: sink seq[float32]): float32 {.gcsafe.} =
     tree.root.get_value(x)
 
 proc predict*(tree: DecisionTree, X: sink seq[seq[float32]]): seq[float32] {.gcsafe.} =
-    X.map_it(tree.predict(it))
+    result = newSeq[float32](X.len)
+    for i, row in X:
+        result[i] = tree.predict(row)
 
 proc predict_proba*(tree: DecisionTree, x: seq[float32]): seq[float32] {.gcsafe.} =
     tree.root.get_proba(x)
 
 proc predict_proba*(tree: DecisionTree, X: seq[seq[float32]]): seq[seq[float32]] {.gcsafe.} =
-    return X.map_it(tree.predict_proba(it))
+    result = newSeq[seq[float32]](X.len)
+    for i, row in X:
+        result[i] = tree.predict_proba(row)

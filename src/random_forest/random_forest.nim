@@ -56,7 +56,7 @@ proc fit* (rf: RandomForest, X: seq[seq[float32]], y: seq[float32]) =
     
                 
     
-proc predict*(rf: RandomForest, x: seq[float32]): float32 {.gcsafe.} =
+proc predict*(rf: RandomForest, x: sink seq[float32]): float32 {.gcsafe.} =
     let predictions = rf.trees.map_it(it.predict(x))
     case rf.task:
         of Classification:
@@ -64,12 +64,12 @@ proc predict*(rf: RandomForest, x: seq[float32]): float32 {.gcsafe.} =
         of Regression:
             return predictions.mean()
 
-proc predict*(rf: RandomForest, X: seq[seq[float32]]): seq[float32] {.gcsafe.} =
+proc predict*(rf: RandomForest, X: sink seq[seq[float32]]): seq[float32] {.gcsafe.} =
     result = new_seq[float32](X.len)
     for i, row in X:
         result[i] = rf.predict(row)
     
-proc predict_proba*(forest: RandomForest, x: seq[float32]): seq[float32] {.gcsafe.} =
+proc predict_proba*(forest: RandomForest, x: sink seq[float32]): seq[float32] {.gcsafe.} =
     result = new_seq[float32](forest.num_classes)
     for t in forest.trees:
         let p_y = t.predict_proba(x)
@@ -78,7 +78,7 @@ proc predict_proba*(forest: RandomForest, x: seq[float32]): seq[float32] {.gcsaf
     for i_class in 0..<forest.num_classes:
         result[i_class] /= forest.num_trees.float32
 
-proc predict_proba*(forest: RandomForest, X: seq[seq[float32]]): seq[seq[float32]]  =
+proc predict_proba*(forest: RandomForest, X: sink seq[seq[float32]]): seq[seq[float32]]  =
     result = newSeq[seq[float32]](X.len)
     for i, row in X:
         result[i] = forest.predict_proba(row)
