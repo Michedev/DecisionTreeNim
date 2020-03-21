@@ -11,9 +11,9 @@ Nim package for decision trees and random forest
 #### Decision Tree
 
 ```
-import decision_tree
+import DecisionTree
 
-let dt = new_classification_tree(max_depth=10)
+let dt = DecisionTree.new_classification_tree(max_depth=10)
 dt.fit(X_train,y_train)
 let yhat = dt.predict(X_test)
 
@@ -22,9 +22,9 @@ let yhat = dt.predict(X_test)
 #### Random forest
 
 ```
-import decision_tree
+import DecisionTree
 
-let rf = new_random_forest_classifier(n_trees=100, num_threads=4) #parallel training too!
+let rf = DecisionTree.new_random_forest_classifier(n_trees=100, num_threads=4) #parallel training too!
 rf.fit(X_train, y_train)
 let yhat = rf.predict(X_test)
 ```
