@@ -2,6 +2,9 @@
 
 Nim package for decision trees and random forest
 
+## How to install
+
+`nimble install decisiontree`
 
 ### Package features
 - Inspired by Scikit-learn api
