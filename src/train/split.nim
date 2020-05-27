@@ -7,7 +7,7 @@ import random
 import splitresult
 import ../view
 import tables
-import future
+import sugar
 import ../task
 import values_selection
 import ../impurity
@@ -71,8 +71,12 @@ proc best_split_col(t: Task, impurity_f: Impurity, x_col: ColumnMatrixView[float
             let (count_y1, count_y2, i1, i2) = split_y_by_value_classification(x_col, y, split)
             if i1.len == 0 or i2.len == 0:
                 continue
-            let freq_y1 = lc[x.float32 / y.len.float32 | (x <- count_y1.values), float32]
-            let freq_y2 = lc[x.float32 / y.len.float32 | (x <- count_y2.values), float32]
+            let freq_y1 = collect(newSeq):
+                for x in count_y1.values:
+                    x.float32 / y.len.float32
+            let freq_y2 = collect(newSeq):
+                for x in count_y2.values:
+                    x.float32 / y.len.float32
             var true_impurity_f: proc(p_y: seq[float32]): float32 {.gcsafe.} = nil
             if impurity_f == Gini:
                 true_impurity_f = gini
