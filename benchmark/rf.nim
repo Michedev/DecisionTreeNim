@@ -1,6 +1,5 @@
 import ../src/random_forest/random_forest
 import ../tests/test_utils
-# import nimprof
 
 
 proc iris_bench() =
@@ -10,7 +9,8 @@ proc iris_bench() =
     let y_data = read_y_data("tests/data/y_iris.csv", times=times)
     rf.fit(X_data, y_data)
     echo "Successfull finished training of a Random Forest of 100 trees"
-    let _ = rf.predict(X_data)
+    let yhat = rf.predict(X_data)
+    echo "accuracy train ", accuracy(y_data, yhat)
     
 if isMainModule:
     iris_bench()
