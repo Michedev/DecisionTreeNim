@@ -1,5 +1,7 @@
 # Decision tree with nim
 
+[![nimble](https://raw.githubusercontent.com/yglukhov/nimble-tag/master/nimble_js.png)](https://github.com/Michedev/DecisionTreeNim)
+
 Nim package for decision trees and random forest
 
 ## How to install
