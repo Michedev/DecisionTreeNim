@@ -11,7 +11,7 @@ type
                 stop_rules*: TreeStopRules
         Leaf* = ref object of Node
                 leaf_f*: proc(x: seq[float32]): float32 {.gcsafe.}
-                leaf_proba*: proc(x: sink seq[float32]): seq[float32] {.gcsafe.}
+                leaf_proba*: proc(x: seq[float32]): seq[float32] {.gcsafe.}
         RootIsLeaf* = object of Exception
 
 proc is_leaf*(n: Node): bool = n is Leaf

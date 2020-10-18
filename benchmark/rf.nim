@@ -1,6 +1,6 @@
 import ../src/random_forest/random_forest
 import ../tests/test_utils
-
+import times
 
 proc iris_bench() =
     let rf = new_random_forest_classifier(100, max_depth=10)

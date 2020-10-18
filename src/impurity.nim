@@ -10,19 +10,19 @@ type Impurity* = enum
     Mse
     Default
 
-proc entropy*(y: sink seq[float32]): float32 {.gcsafe.} =
+proc entropy*(y: seq[float32]): float32 {.gcsafe.} =
     result = 0.0
     for p in y:
         result +=  - (p * ln(p))
 
 
-proc gini*(y: sink seq[float32]): float32 {.gcsafe.} =
+proc gini*(y: seq[float32]): float32 {.gcsafe.} =
     result = 0.0
     for p in y:
         result +=  p * (1 - p)
 
 
-proc mse_from_mean*(y: sink seq[float32], y_mean: float32): float32 {.gcsafe.} =
+proc mse_from_mean*(y: seq[float32], y_mean: float32): float32 {.gcsafe.} =
     result = 0.0
     for value in y:
         result += (value - y_mean) * (value - y_mean)

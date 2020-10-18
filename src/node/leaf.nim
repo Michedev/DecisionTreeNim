@@ -9,13 +9,13 @@ proc get_leaf_func*(n: Node, X: MatrixView[float32], y: VectorView[float32]) : a
     if n.tree_task == Classification:
         var ctable = toCountTable y.to_seq()
         let mode: float32 = ctable.largest.key
-        return proc(x: sink seq[float32]): float32 {.gcsafe.} = mode
+        return proc(x: seq[float32]): float32 {.gcsafe.} = mode
     else:
         var tot: float32 = 0.0
         for v in y:
             tot += v
         let m: float32 = tot / y.len.float32
-        return proc(x: sink seq[float32]): float32 {.gcsafe.} = m
+        return proc(x: seq[float32]): float32 {.gcsafe.} = m
 
 #TODO export and add field on leaf type
 proc get_leaf_proba_func*(n: Node, X: MatrixView[float32], y: VectorView[float32]) : auto {.gcsafe.} =

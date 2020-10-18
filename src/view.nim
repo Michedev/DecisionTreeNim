@@ -15,28 +15,28 @@ type
         fixed: int
 
 
-proc new_vector_view*[T: int|float32|float32](data: seq[T], index: sink seq[int]): VectorView[T] =
+proc new_vector_view*[T: int|float32|float32](data: seq[T], index: seq[int]): VectorView[T] =
     result = new(VectorView[T])
     result.data := data
     result.index = index
 
-proc new_vector_view*[T: int|float32|float32](v: VectorView[T], index: sink seq[int]): VectorView[T] =
+proc new_vector_view*[T: int|float32|float32](v: VectorView[T], index: seq[int]): VectorView[T] =
     new_vector_view(v.data, index)
     
 
-proc new_matrix_view*[T: int|float32|float32](data: seq[seq[T]], index, columns: sink seq[int]): MatrixView[T] =
+proc new_matrix_view*[T: int|float32|float32](data: seq[seq[T]], index, columns: seq[int]): MatrixView[T] =
     result = new(MatrixView[T])
     result.data := data
     result.index = index
     result.columns = columns
 
-proc new_matrix_view*[T: int|float32|float32](data: seq[seq[T]], index: sink seq[int]): MatrixView[T] =
+proc new_matrix_view*[T: int|float32|float32](data: seq[seq[T]], index: seq[int]): MatrixView[T] =
     new_matrix_view(data, index, (0..<data[0].len).to_seq)
     
-proc new_matrix_view*[T: int|float32|float32](m: MatrixView[T], index: sink seq[int]): MatrixView[T] =
+proc new_matrix_view*[T: int|float32|float32](m: MatrixView[T], index: seq[int]): MatrixView[T] =
     new_matrix_view(m.data, index, m.columns)
         
-proc new_matrix_view*[T: int|float32|float32](m: MatrixView[T], index, columns: sink seq[int]): MatrixView[T] =
+proc new_matrix_view*[T: int|float32|float32](m: MatrixView[T], index, columns: seq[int]): MatrixView[T] =
     new_matrix_view(m.data, index, columns)
     
 proc set_index*[T: int|float32|float32, V: VectorView[T] | MatrixView[T]](m: V, index: seq[int]) =
