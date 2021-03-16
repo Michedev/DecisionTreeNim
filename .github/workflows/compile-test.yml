@@ -25,9 +25,9 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       
-      - name: Run tests
-        run: sudo apt-get install nim
-
+      - name: Pull choosenim
+        run: curl https://nim-lang.org/choosenim/init.sh -sSf | sh
+        
       # Runs a single command using the runners shell
       - name: Run tests
-        run: nim c -r tests/test*
+        run: choosenim stable && nim c -r tests/test*
