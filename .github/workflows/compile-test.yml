@@ -26,11 +26,12 @@ jobs:
       - uses: actions/checkout@v2
       
       - name: Pull choosenim
-        run: sudo apt-get update && sudo apt-get install -y nim
+        run: curl https://nim-lang.org/choosenim/init.sh -sSf > install-nim.sh
         
-      - name: Print nim version
-        run: nim --version
+        
+      - name: Install nim
+        run: chmod +x install-nim.sh && ./install-nim.sh -y
         
       # Runs a single command using the runners shell
       - name: Run tests
-        run: nim c -r tests/test*
+        run: choosenim 1.2.0 && nim c -r tests/test*
