@@ -34,4 +34,4 @@ jobs:
         
       # Runs a single command using the runners shell
       - name: Run tests
-        run: choosenim 1.2.0 && nim c -r tests/test*
+        run: export PATH=/home/runner/.nimble/bin:$PATH && choosenim 1.2.0 && nim c -r tests/test*
